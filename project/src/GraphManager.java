@@ -1,0 +1,54 @@
+import org.graphstream.algorithm.generator.DorogovtsevMendesGenerator;
+import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
+import org.graphstream.graph.implementations.SingleGraph;
+
+public class GraphManager{
+    protected static String styleSheet =
+        "node {" +
+                // "     shape: box;" +
+                "   stroke-mode: plain;" +
+                "   size: 10px, 15px;" +
+                "   stroke-color: yellow;" +
+                "   size: 20px; fill-color: rgb(100,255,100), rgba(50,50,50,0); fill-mode: gradient-radial;" +
+                // "   shadow-mode: gradient-radial; shadow-width: 5px; shadow-color: #EEF, #000; shadow-offset: 2px;" +
+                "}" +
+                "node.marked {" +
+                "   fill-color: red;" +
+                "}" +
+                "node.marked2 {" +
+                "   fill-color: blue;" +
+                "}" +
+                "node.marked3 {" +
+                "   fill-color: yellow;" +
+                "}" +
+                "node:clicked {" +
+                "   fill-color: green;" +
+                "}" +
+                "edge {" +
+                "   fill-color: brown;" +
+                // "shape: cubic-curve;" +
+                "}" +
+                "graph {" +
+                "   fill-color: #001329, #1C3353, red;" +
+                "   fill-mode: gradient-vertical;" +
+                "}";
+    
+    public static Graph createGraph(String name) {
+        DorogovtsevMendesGenerator gen = new DorogovtsevMendesGenerator();
+        Graph graph = new SingleGraph(name);
+        gen.addSink(graph);
+        gen.begin();
+        for (int i = 0; i < 20; i++) {
+            gen.nextEvents();
+        }
+        gen.end();
+
+        graph.setAttribute("ui.stylesheet", styleSheet); // Assuming styleSheet is public in GraphWithButton
+        for (Node node : graph) {
+            node.setAttribute("ui.label", node.getId());
+            node.setAttribute("ui.class", "unmarked");
+        }
+        return graph;
+    }
+}
