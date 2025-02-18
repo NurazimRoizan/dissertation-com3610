@@ -153,7 +153,13 @@ public class TestGraphColour implements ViewerListener {
         while (k.hasNext()) {
             Node next = k.next();
             degree = next.getDegree();
-            next.setAttribute("ui.class", "colour"+degree);
+            if (degree > 9){
+                next.setAttribute("ui.class", "colour");
+            }
+            else if (degree== 1){
+                next.setAttribute("ui.class", "interpo");
+                next.setAttribute("ui.color", (float)(0.8));
+            } else {next.setAttribute("ui.class", "colour"+degree); }
             System.out.println("colour"+degree);
             sleep();
         }
