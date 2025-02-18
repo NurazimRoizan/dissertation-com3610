@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseAdapter;
 import java.util.Iterator;
+import java.awt.FlowLayout;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -23,10 +24,11 @@ public class PebbleGameSet implements ViewerListener {
     protected boolean loop = true;
     protected Graph graph, graph2, currentGraph;
     protected String colourMode = "marked";
+    protected boolean exploreGraph = false;
 
     public static void main(String args[]) {
         System.setProperty("org.graphstream.ui", "swing");
-        new GraphWithButton();
+        new PebbleGameSet();
     }
 
     public PebbleGameSet() {
@@ -47,10 +49,11 @@ public class PebbleGameSet implements ViewerListener {
         JFrame frame = new JFrame("Pebble Game Set");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JPanel buttonPanel = new JPanel();
+        JPanel buttonPanel = new JPanel(new FlowLayout());
         JPanel centerPanel = new JPanel(new GridLayout(1, 2));
         centerPanel.add((Component) view);
         centerPanel.add((Component) viewPanel2);
+
         JButton myButton = new JButton("Spoiler");
         myButton.addActionListener(new ActionListener() {
             @Override
@@ -67,9 +70,18 @@ public class PebbleGameSet implements ViewerListener {
                 colourMode = "marked2";
             }
         });
+        JButton myButton3 = new JButton("Explore");
+        myButton3.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Exploring . . .");
+                exploreGraph = true;
+            }
+        });
 
         buttonPanel.add(myButton);
         buttonPanel.add(myButton2);
+        buttonPanel.add(myButton3);
 
         frame.add(centerPanel, BorderLayout.CENTER);
         frame.add(buttonPanel, BorderLayout.SOUTH);
@@ -115,6 +127,9 @@ public class PebbleGameSet implements ViewerListener {
         while (loop) {
             fromViewer.pump();
             fromViewer2.pump();
+            if (exploreGraph) {
+                explore(currentGraph.getNode("1"));
+            };
         }
 
         
@@ -149,4 +164,17 @@ public class PebbleGameSet implements ViewerListener {
 		System.out.println("Need the Mouse Options to be activated");
 	}
 
+    public void explore(Node source) {
+        Iterator<? extends Node> k = source.getBreadthFirstIterator();
+    
+        while (k.hasNext()) {
+            Node next = k.next();
+            next.setAttribute("ui.class", "marked");
+            sleep();
+        }
+    }
+
+    protected void sleep() {
+        try { Thread.sleep(1000); } catch (Exception e) {}
+    }
 }

@@ -1,4 +1,5 @@
-import org.graphstream.algorithm.generator.DorogovtsevMendesGenerator;
+import org.graphstream.algorithm.generator.*;
+import org.graphstream.algorithm.generator.Generator;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
@@ -35,7 +36,9 @@ public class GraphManager{
                 "}";
     
     public static Graph createGraph(String name) {
-        DorogovtsevMendesGenerator gen = new DorogovtsevMendesGenerator();
+        //DorogovtsevMendesGenerator gen = new DorogovtsevMendesGenerator();
+        //Generator gen = new BananaTreeGenerator();
+        Generator gen = new BarabasiAlbertGenerator(1);
         Graph graph = new SingleGraph(name);
         gen.addSink(graph);
         gen.begin();
@@ -44,7 +47,7 @@ public class GraphManager{
         }
         gen.end();
 
-        graph.setAttribute("ui.stylesheet", styleSheet); // Assuming styleSheet is public in GraphWithButton
+        graph.setAttribute("ui.stylesheet", styleSheet); 
         for (Node node : graph) {
             node.setAttribute("ui.label", node.getId());
             node.setAttribute("ui.class", "unmarked");

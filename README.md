@@ -10,5 +10,5 @@ This project delves into the fascinating intersection of pebble games and the k-
    - Navigate to the `lib` folder in your project and select all the JAR files you need to include.
 
 3. **Run the application:**
-   - Open the main Java file that contains your application's entry point (the one with the `main` method).
+   - Open the main Java file.
    - Right-click in the file and select "Run Java".
