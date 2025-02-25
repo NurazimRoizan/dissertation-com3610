@@ -17,37 +17,11 @@ public class TestGraphManager{
                 "   fill-color: red;" +
                 "}" +
                 "node.colour {" +
-                "   fill-color: gray;" +
+                "   fill-mode: dyn-plain;" +
+                "   fill-color: blue, green, red;" +
                 "}" +
                 "node.colour0 {" +
                 "   fill-color: gray;" +
-                "}" +
-                "node.colour1 {" +
-                "   fill-color: cyan;" +
-                "}" +
-                "node.colour2 {" +
-                "   fill-color: blue;" +
-                "}" +
-                "node.colour3 {" +
-                "   fill-color: green;" +
-                "}" +
-                "node.colour4 {" +
-                "   fill-color: lightgreen;" +
-                "}" +
-                "node.colour5 {" +
-                "   fill-color: yellow;" +
-                "}" +
-                "node.colour6 {" +
-                "   fill-color: orange;" +
-                "}" +
-                "node.colour7 {" +
-                "   fill-color: red;" +
-                "}" +
-                "node.colour8 {" +
-                "   fill-color:coral ;" +
-                "}" +
-                "node.colour9 {" +
-                "   fill-color: purple;" +
                 "}" +
                 "node.interpo {" +
                 "   fill-mode: dyn-plain;" +

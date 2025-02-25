@@ -6,7 +6,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.FlowLayout;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -26,6 +28,8 @@ public class TestGraphColour implements ViewerListener {
     protected boolean loop = true;
     protected String colourMode = "marked";
     protected boolean exploreGraph = false;
+    protected int colourIndex = 0;
+    protected Map<Integer, Integer> colourTable = new HashMap<Integer, Integer>();
 
     public static void main(String args[]){
         System.setProperty("org.graphstream.ui", "swing");
@@ -113,20 +117,25 @@ public class TestGraphColour implements ViewerListener {
     public void viewClosed(String id) {
 		loop = false;
 	}
+    float colourTemp =  0;
     public void buttonPushed(String id) {
 		System.out.println("Button pushed on node "+id);
-        // Toggle the color between green and the original color
         Node clickedNode = currentGraph.getNode(id);
+        String currentClass = (String)clickedNode.getAttribute("ui.class");
+
         //check neighbour
         // Boolean hehe = clickedNode.hasEdgeToward(currentGraph.getNode("1"));
         int hehe = clickedNode.getDegree();
         System.out.println(hehe);
+
         // Check if the clicked node ID exists in graph1
-        String currentClass = (String)clickedNode.getAttribute("ui.class");
-        if (currentClass.equals(colourMode)) {
+        if (!currentClass.equals("unmarked")) {
+            colourTemp = (float)clickedNode.getAttribute("ui.color");
             clickedNode.setAttribute("ui.class", "unmarked");
+            
         } else {
-            clickedNode.setAttribute("ui.class", colourMode);
+            clickedNode.setAttribute("ui.class", "colour");
+            clickedNode.setAttribute("ui.color", colourTemp);
         }
 	}
 
@@ -148,21 +157,40 @@ public class TestGraphColour implements ViewerListener {
 
     public void explore(Node source) {
         Iterator<? extends Node> k = source.getBreadthFirstIterator();
+        Iterator<? extends Node> j = source.getBreadthFirstIterator();
         int degree;
-    
+        int currentColourIndex = -1;
+
         while (k.hasNext()) {
             Node next = k.next();
             degree = next.getDegree();
-            if (degree > 9){
-                next.setAttribute("ui.class", "colour");
+            
+            if (degree >= 0){
+                if (colourTable.containsKey(degree)){
+                    next.setAttribute("ui.class", "colour");
+                }else {
+                    colourIndex += 1;
+                    colourTable.put(degree, colourIndex);
+                    next.setAttribute("ui.class", "colour");
+                    
+                }
+            } else {next.setAttribute("ui.class", "colour0"); }
+        }
+        
+        while(j.hasNext()){
+            int size = colourTable.size();
+            Node next = j.next();
+            degree = next.getDegree();
+            float div = 1/(float)(colourTable.size()-1);
+            if (colourTable.containsKey(degree)){
+                currentColourIndex = colourTable.get(degree); 
+                next.setAttribute("ui.color", div*(currentColourIndex-1));
             }
-            else if (degree== 1){
-                next.setAttribute("ui.class", "interpo");
-                next.setAttribute("ui.color", (float)(0.8));
-            } else {next.setAttribute("ui.class", "colour"+degree); }
-            System.out.println("colour"+degree);
+            System.out.println(size);
+            System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex-1) );
             sleep();
         }
+
         exploreGraph = false;
         System.out.println("End of Exploration");
     }
