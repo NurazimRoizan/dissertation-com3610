@@ -126,7 +126,7 @@ public class TestGraphColour implements ViewerListener {
         //check neighbour
         // Boolean hehe = clickedNode.hasEdgeToward(currentGraph.getNode("1"));
         int hehe = clickedNode.getDegree();
-        System.out.println(hehe);
+        System.out.println("number of neightbour="+ hehe);
 
         // Check if the clicked node ID exists in graph1
         if (!currentClass.equals("unmarked")) {
@@ -158,8 +158,19 @@ public class TestGraphColour implements ViewerListener {
     public void explore(Node source) {
         Iterator<? extends Node> k = source.getBreadthFirstIterator();
         Iterator<? extends Node> j = source.getBreadthFirstIterator();
-        int degree;
         int currentColourIndex = -1;
+        int degree = source.getDegree();
+
+        // Assign each node with colour attribute
+        if (degree >= 0){
+            if (colourTable.containsKey(degree)){
+                source.setAttribute("ui.class", "colour");
+            }else {
+                colourTable.put(degree, colourIndex);
+                source.setAttribute("ui.class", "colour");
+                colourIndex += 1;
+            }
+        } else {source.setAttribute("ui.class", "colour0"); }
 
         while (k.hasNext()) {
             Node next = k.next();
@@ -169,14 +180,16 @@ public class TestGraphColour implements ViewerListener {
                 if (colourTable.containsKey(degree)){
                     next.setAttribute("ui.class", "colour");
                 }else {
-                    colourIndex += 1;
                     colourTable.put(degree, colourIndex);
                     next.setAttribute("ui.class", "colour");
+                    colourIndex += 1;
                     
                 }
             } else {next.setAttribute("ui.class", "colour0"); }
         }
+        System.out.println("Assigned colour attribute to the nodes");
         
+        // Colour the nodes
         while(j.hasNext()){
             int size = colourTable.size();
             Node next = j.next();
@@ -184,10 +197,9 @@ public class TestGraphColour implements ViewerListener {
             float div = 1/(float)(colourTable.size()-1);
             if (colourTable.containsKey(degree)){
                 currentColourIndex = colourTable.get(degree); 
-                next.setAttribute("ui.color", div*(currentColourIndex-1));
+                next.setAttribute("ui.color", div*(currentColourIndex));
             }
-            System.out.println(size);
-            System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex-1) );
+            System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
             sleep();
         }
 
