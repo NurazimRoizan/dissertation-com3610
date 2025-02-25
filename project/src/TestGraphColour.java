@@ -90,12 +90,10 @@ public class TestGraphColour implements ViewerListener {
         fromViewer.addViewerListener(this);
         fromViewer.addSink(graph);
 
-        computeCentroid(graph);
-
         while (loop) {
             fromViewer.pump();
             if (exploreGraph) {
-                explore(currentGraph.getNode("1"));
+                explore(computeCentroid(graph));
             };
         }
 
@@ -138,8 +136,8 @@ public class TestGraphColour implements ViewerListener {
             clickedNode.setAttribute("ui.color", colourTemp);
         }
 	}
-
-    public void computeCentroid(Graph graph){
+    int currentCentroid = 0;
+    public Node computeCentroid(Graph graph){
         APSP apsp = new APSP();
  		apsp.init(graph);
  		apsp.compute();
@@ -149,10 +147,12 @@ public class TestGraphColour implements ViewerListener {
  		centroid.compute();
 		graph.nodes().forEach( n -> {
  			Boolean in = (Boolean) n.getAttribute("centroid");
- 
- 			System.out.printf("%s is%s in the centroid.\n", n.getId(), in ? ""
- 					: " not");
+ 			System.out.printf("%s is%s in the centroid.\n", n.getId(), in ? "" : " not");
+            if (in){
+                currentCentroid = Integer.parseInt(n.getId());
+            }
  		});
+        return graph.getNode(currentCentroid);
     }
 
     public void explore(Node source) {
