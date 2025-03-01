@@ -191,7 +191,6 @@ public class TestGraphColour implements ViewerListener {
         
         // Colour the nodes
         while(j.hasNext()){
-            int size = colourTable.size();
             Node next = j.next();
             degree = next.getDegree();
             float div = 1/(float)(colourTable.size()-1);
