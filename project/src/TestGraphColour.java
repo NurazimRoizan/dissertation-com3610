@@ -6,9 +6,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.FlowLayout;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -115,6 +117,8 @@ public class TestGraphColour implements ViewerListener {
     public void viewClosed(String id) {
 		loop = false;
 	}
+
+
     float colourTemp =  0;
     public void buttonPushed(String id) {
 		System.out.println("Button pushed on node "+id);
@@ -125,6 +129,8 @@ public class TestGraphColour implements ViewerListener {
         // Boolean hehe = clickedNode.hasEdgeToward(currentGraph.getNode("1"));
         int hehe = clickedNode.getDegree();
         System.out.println("number of neightbour="+ hehe);
+
+        checkNode(clickedNode);
 
         // Check if the clicked node ID exists in graph1
         if (!currentClass.equals("unmarked")) {
@@ -162,6 +168,7 @@ public class TestGraphColour implements ViewerListener {
         int degree = source.getDegree();
 
         // Assign each node with colour attribute
+        // - First node
         if (degree >= 0){
             if (colourTable.containsKey(degree)){
                 source.setAttribute("ui.class", "colour");
@@ -172,6 +179,8 @@ public class TestGraphColour implements ViewerListener {
             }
         } else {source.setAttribute("ui.class", "colour0"); }
 
+
+        // - rest of the node
         while (k.hasNext()) {
             Node next = k.next();
             degree = next.getDegree();
@@ -197,6 +206,8 @@ public class TestGraphColour implements ViewerListener {
             if (colourTable.containsKey(degree)){
                 currentColourIndex = colourTable.get(degree); 
                 next.setAttribute("ui.color", div*(currentColourIndex));
+                //String addString = String.valueOf(next.getAttribute("signature"));
+                next.setAttribute("signature", String.valueOf(degree));
             }
             System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
             sleep();
@@ -206,7 +217,43 @@ public class TestGraphColour implements ViewerListener {
         System.out.println("End of Exploration");
     }
 
+    public void checkNode(Node source){
+        //Iterator<? extends Node> j = source.getBreadthFirstIterator();
+        System.out.println(source);
+        Stream<Node> neighbourNodes = source.neighborNodes();
+        neighbourNodes.forEach(neighbourNode -> {
+            String currentSignature = String.valueOf(source.getAttribute("signature"));
+            String colorCode = String.valueOf(neighbourNode.getAttribute("signature"));
+            currentSignature = createSortedSignature(currentSignature + colorCode);
+            System.out.println("Neighbor color: " + colorCode);
+            System.out.println("sorted signature: " + currentSignature);
+            source.setAttribute("signature", currentSignature);
+        });
+    }
+
     protected void sleep() {
-        try { Thread.sleep(300); } catch (Exception e) {}
+        try { Thread.sleep(100); } catch (Exception e) {}
+    }
+
+    // Old method. Delete after trial
+    public static boolean isSameSignature(String a, String b) {
+        if (a.length() != b.length()) {
+            return false;
+        }
+
+        char[] aChars = a.toCharArray();
+        char[] bChars = b.toCharArray();
+
+        Arrays.sort(aChars);
+        Arrays.sort(bChars);
+
+        return Arrays.equals(aChars, bChars);
+    }
+
+    // New Method 
+    public static String createSortedSignature(String s) {
+        char[] chars = s.toCharArray();
+        Arrays.sort(chars);
+        return new String(chars);
     }
 }
