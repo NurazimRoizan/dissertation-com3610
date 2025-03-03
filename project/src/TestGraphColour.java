@@ -221,14 +221,16 @@ public class TestGraphColour implements ViewerListener {
         //Iterator<? extends Node> j = source.getBreadthFirstIterator();
         System.out.println(source);
         Stream<Node> neighbourNodes = source.neighborNodes();
+        String currentSignature = String.valueOf(source.getAttribute("signature"));
+        String currentDegree = currentSignature.substring(0,1);
+        StringBuilder neighbourSignature = new StringBuilder();
         neighbourNodes.forEach(neighbourNode -> {
-            String currentSignature = String.valueOf(source.getAttribute("signature"));
-            String colorCode = String.valueOf(neighbourNode.getAttribute("signature"));
-            currentSignature = createSortedSignature(currentSignature + colorCode);
-            System.out.println("Neighbor color: " + colorCode);
-            System.out.println("sorted signature: " + currentSignature);
-            source.setAttribute("signature", currentSignature);
+            neighbourSignature.append(String.valueOf(neighbourNode.getAttribute("signature")));
+            System.out.println("Neighbor color signature: " + neighbourSignature);
+            System.out.println("Current Signature: " + currentDegree + neighbourSignature);
         });
+        String sortedNeighbourSignature = createSortedSignature(neighbourSignature.toString());
+        source.setAttribute("Signature", currentDegree + sortedNeighbourSignature);
     }
 
     protected void sleep() {
