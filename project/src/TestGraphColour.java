@@ -30,7 +30,9 @@ public class TestGraphColour implements ViewerListener {
     protected boolean loop = true;
     protected String colourMode = "marked";
     protected boolean exploreGraph = false;
+    protected boolean exploreGraph2 = false;
     protected int colourIndex = 0;
+    protected int round = 1;
     protected Map<Integer, Integer> colourTable = new HashMap<Integer, Integer>();
 
     public static void main(String args[]){
@@ -64,7 +66,17 @@ public class TestGraphColour implements ViewerListener {
             }
         });
 
+        JButton myButton4 = new JButton("Text button");
+        myButton4.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Exploring2 . . .");
+                exploreGraph2 = true;
+            }
+        });
+
         buttonPanel.add(myButton3);
+        buttonPanel.add(myButton4);
 
         frame.add(centerPanel, BorderLayout.CENTER);
         frame.add(buttonPanel, BorderLayout.SOUTH);
@@ -96,6 +108,9 @@ public class TestGraphColour implements ViewerListener {
             fromViewer.pump();
             if (exploreGraph) {
                 explore(computeCentroid(graph));
+            };
+            if (exploreGraph2) {
+                nextExplore(computeCentroid(graph));
             };
         }
 
@@ -207,7 +222,7 @@ public class TestGraphColour implements ViewerListener {
                 currentColourIndex = colourTable.get(degree); 
                 next.setAttribute("ui.color", div*(currentColourIndex));
                 //String addString = String.valueOf(next.getAttribute("signature"));
-                next.setAttribute("signature", String.valueOf(degree));
+                next.setAttribute("signature1", String.valueOf(degree));
             }
             System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
             sleep();
@@ -217,20 +232,85 @@ public class TestGraphColour implements ViewerListener {
         System.out.println("End of Exploration");
     }
 
+    public void nextExplore(Node source) {
+        Iterator<? extends Node> k = source.getBreadthFirstIterator();
+        Iterator<? extends Node> j = source.getBreadthFirstIterator();
+        Iterator<? extends Node> i = source.getBreadthFirstIterator();
+        colourTable.clear();
+        colourIndex = 0;
+        int currentColourIndex = -1;
+
+        //Stream<Node> neighbourNodes = source.neighborNodes();
+
+        // Assign each node with signature attribute
+        // - First node
+        System.out.println("source . . . . . . . . . . . ");
+        checkNode(source);
+        while (i.hasNext()){
+            Node next = i.next();
+            System.out.println(next + " . . . . . . . . . . . ");
+            checkNode(next);
+            sleep();
+        }
+
+        String currentSignature = String.valueOf(source.getAttribute("signature"+(round+1)));
+
+        if (currentSignature != null){
+            if (colourTable.containsKey(Integer.valueOf(currentSignature))){
+                //do nothing
+            }else {
+                colourTable.put(Integer.valueOf(currentSignature), colourIndex);
+                colourIndex += 1;
+            }
+        }
+        // - rest of the node
+        while (k.hasNext()) {
+            Node next = k.next();
+            currentSignature = String.valueOf(next.getAttribute("signature"+(round+1)));
+            System.out.println("currentSignature is "+ currentSignature);
+            
+            if (currentSignature != null){
+                if (colourTable.containsKey(Integer.valueOf(currentSignature))){
+                    //do nothing
+                }else {
+                    colourTable.put(Integer.valueOf(currentSignature), colourIndex);
+                    colourIndex += 1;
+                }
+            }
+        }
+        System.out.println("Assigned signature attribute to the nodes");
+        
+        // Colour the nodes
+        
+        while(j.hasNext()){
+            Node next = j.next();
+            currentSignature = String.valueOf(next.getAttribute("signature"+(round+1)));
+            float div = 1/(float)(colourTable.size()-1);
+            currentColourIndex = colourTable.get(Integer.valueOf(currentSignature)); 
+            next.setAttribute("ui.color", div*(currentColourIndex));
+            System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
+            sleep();
+        }
+
+        exploreGraph2 = false;
+        System.out.println("End of Exploration");
+    }
+
     public void checkNode(Node source){
-        //Iterator<? extends Node> j = source.getBreadthFirstIterator();
         System.out.println(source);
         Stream<Node> neighbourNodes = source.neighborNodes();
-        String currentSignature = String.valueOf(source.getAttribute("signature"));
+        String currentSignature = String.valueOf(source.getAttribute("signature"+round));
         String currentDegree = currentSignature.substring(0,1);
         StringBuilder neighbourSignature = new StringBuilder();
         neighbourNodes.forEach(neighbourNode -> {
-            neighbourSignature.append(String.valueOf(neighbourNode.getAttribute("signature")));
+            neighbourSignature.append(String.valueOf(neighbourNode.getAttribute("signature"+round)));
             System.out.println("Neighbor color signature: " + neighbourSignature);
-            System.out.println("Current Signature: " + currentDegree + neighbourSignature);
+            System.out.println("Current Signature: " + String.valueOf(currentDegree) + neighbourSignature);
         });
         String sortedNeighbourSignature = createSortedSignature(neighbourSignature.toString());
-        source.setAttribute("Signature", currentDegree + sortedNeighbourSignature);
+        neighbourSignature.setLength(0);
+        source.setAttribute("signature"+(round+1), currentDegree + sortedNeighbourSignature);
+        System.out.println("Done set for node= "+ source);
     }
 
     protected void sleep() {
