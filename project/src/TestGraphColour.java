@@ -33,7 +33,7 @@ public class TestGraphColour implements ViewerListener {
     protected boolean exploreGraph2 = false;
     protected int colourIndex = 0;
     protected int round = 1;
-    protected Map<Integer, Integer> colourTable = new HashMap<Integer, Integer>();
+    protected Map<String, Integer> colourTable = new HashMap<String, Integer>();
 
     public static void main(String args[]){
         System.setProperty("org.graphstream.ui", "swing");
@@ -74,9 +74,18 @@ public class TestGraphColour implements ViewerListener {
                 exploreGraph2 = true;
             }
         });
+        JButton myButton5 = new JButton("Increase Round");
+        myButton5.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                round += 1;
+                System.out.println("increased round to "+ round);
+            }
+        });
 
         buttonPanel.add(myButton3);
         buttonPanel.add(myButton4);
+        buttonPanel.add(myButton5);
 
         frame.add(centerPanel, BorderLayout.CENTER);
         frame.add(buttonPanel, BorderLayout.SOUTH);
@@ -185,10 +194,10 @@ public class TestGraphColour implements ViewerListener {
         // Assign each node with colour attribute
         // - First node
         if (degree >= 0){
-            if (colourTable.containsKey(degree)){
+            if (colourTable.containsKey(String.valueOf(degree))){
                 source.setAttribute("ui.class", "colour");
             }else {
-                colourTable.put(degree, colourIndex);
+                colourTable.put(String.valueOf(degree), colourIndex);
                 source.setAttribute("ui.class", "colour");
                 colourIndex += 1;
             }
@@ -201,10 +210,10 @@ public class TestGraphColour implements ViewerListener {
             degree = next.getDegree();
             
             if (degree >= 0){
-                if (colourTable.containsKey(degree)){
+                if (colourTable.containsKey(String.valueOf(degree))){
                     next.setAttribute("ui.class", "colour");
                 }else {
-                    colourTable.put(degree, colourIndex);
+                    colourTable.put(String.valueOf(degree), colourIndex);
                     next.setAttribute("ui.class", "colour");
                     colourIndex += 1;
                     
@@ -218,8 +227,8 @@ public class TestGraphColour implements ViewerListener {
             Node next = j.next();
             degree = next.getDegree();
             float div = 1/(float)(colourTable.size()-1);
-            if (colourTable.containsKey(degree)){
-                currentColourIndex = colourTable.get(degree); 
+            if (colourTable.containsKey(String.valueOf(degree))){
+                currentColourIndex = colourTable.get(String.valueOf(degree)); 
                 next.setAttribute("ui.color", div*(currentColourIndex));
                 //String addString = String.valueOf(next.getAttribute("signature"));
                 next.setAttribute("signature1", String.valueOf(degree));
@@ -256,10 +265,10 @@ public class TestGraphColour implements ViewerListener {
         String currentSignature = String.valueOf(source.getAttribute("signature"+(round+1)));
 
         if (currentSignature != null){
-            if (colourTable.containsKey(Integer.valueOf(currentSignature))){
+            if (colourTable.containsKey(currentSignature)){
                 //do nothing
             }else {
-                colourTable.put(Integer.valueOf(currentSignature), colourIndex);
+                colourTable.put(currentSignature, colourIndex);
                 colourIndex += 1;
             }
         }
@@ -267,13 +276,12 @@ public class TestGraphColour implements ViewerListener {
         while (k.hasNext()) {
             Node next = k.next();
             currentSignature = String.valueOf(next.getAttribute("signature"+(round+1)));
-            System.out.println("currentSignature is "+ currentSignature);
             
             if (currentSignature != null){
-                if (colourTable.containsKey(Integer.valueOf(currentSignature))){
+                if (colourTable.containsKey(currentSignature)){
                     //do nothing
                 }else {
-                    colourTable.put(Integer.valueOf(currentSignature), colourIndex);
+                    colourTable.put(currentSignature, colourIndex);
                     colourIndex += 1;
                 }
             }
@@ -286,7 +294,7 @@ public class TestGraphColour implements ViewerListener {
             Node next = j.next();
             currentSignature = String.valueOf(next.getAttribute("signature"+(round+1)));
             float div = 1/(float)(colourTable.size()-1);
-            currentColourIndex = colourTable.get(Integer.valueOf(currentSignature)); 
+            currentColourIndex = colourTable.get(currentSignature);     
             next.setAttribute("ui.color", div*(currentColourIndex));
             System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
             sleep();
