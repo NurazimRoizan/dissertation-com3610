@@ -31,8 +31,11 @@ public class TestGraphColour implements ViewerListener {
     protected String colourMode = "marked";
     protected boolean exploreGraph = false;
     protected boolean exploreGraph2 = false;
+    protected boolean cRefinementGoing = false;
     protected int colourIndex = 0;
     protected int round = 1;
+    protected int previousSize = 0;
+    protected boolean colorChanges = false;
     protected Map<String, Integer> colourTable = new HashMap<String, Integer>();
 
     public static void main(String args[]){
@@ -57,7 +60,7 @@ public class TestGraphColour implements ViewerListener {
         JPanel centerPanel = new JPanel(new GridLayout(1, 2));
         centerPanel.add((Component) view);
 
-        JButton myButton3 = new JButton("Explore");
+        JButton myButton3 = new JButton("First Iteration");
         myButton3.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -66,7 +69,7 @@ public class TestGraphColour implements ViewerListener {
             }
         });
 
-        JButton myButton4 = new JButton("Text button");
+        JButton myButton4 = new JButton("Next Iteration");
         myButton4.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -82,10 +85,21 @@ public class TestGraphColour implements ViewerListener {
                 System.out.println("increased round to "+ round);
             }
         });
+        JButton myButton6 = new JButton("Colour Refinement");
+        myButton6.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Starting Colour Refinement . . . .");
+                cRefinementGoing = true;
+                exploreGraph = true;
+            }
+        });
 
         buttonPanel.add(myButton3);
         buttonPanel.add(myButton4);
         buttonPanel.add(myButton5);
+        buttonPanel.add(myButton6);
+
 
         frame.add(centerPanel, BorderLayout.CENTER);
         frame.add(buttonPanel, BorderLayout.SOUTH);
@@ -121,6 +135,9 @@ public class TestGraphColour implements ViewerListener {
             if (exploreGraph2) {
                 nextExplore(computeCentroid(graph));
             };
+            if (cRefinementGoing){
+                cRefinement(graph);
+            }
         }
 
         
@@ -150,11 +167,10 @@ public class TestGraphColour implements ViewerListener {
         String currentClass = (String)clickedNode.getAttribute("ui.class");
 
         //check neighbour
-        // Boolean hehe = clickedNode.hasEdgeToward(currentGraph.getNode("1"));
         int hehe = clickedNode.getDegree();
         System.out.println("number of neightbour="+ hehe);
-
-        checkNode(clickedNode);
+        //debugginh purpose
+        checkNode2(clickedNode);
 
         // Check if the clicked node ID exists in graph1
         if (!currentClass.equals("unmarked")) {
@@ -200,6 +216,7 @@ public class TestGraphColour implements ViewerListener {
                 colourTable.put(String.valueOf(degree), colourIndex);
                 source.setAttribute("ui.class", "colour");
                 colourIndex += 1;
+                colorChanges = true;
             }
         } else {source.setAttribute("ui.class", "colour0"); }
 
@@ -216,6 +233,7 @@ public class TestGraphColour implements ViewerListener {
                     colourTable.put(String.valueOf(degree), colourIndex);
                     next.setAttribute("ui.class", "colour");
                     colourIndex += 1;
+                    colorChanges = true;
                     
                 }
             } else {next.setAttribute("ui.class", "colour0"); }
@@ -226,17 +244,16 @@ public class TestGraphColour implements ViewerListener {
         while(j.hasNext()){
             Node next = j.next();
             degree = next.getDegree();
-            float div = 1/(float)(colourTable.size()-1);
+            double div = 1/(double)(colourTable.size()-1);
             if (colourTable.containsKey(String.valueOf(degree))){
                 currentColourIndex = colourTable.get(String.valueOf(degree)); 
-                next.setAttribute("ui.color", div*(currentColourIndex));
+                next.setAttribute("ui.color", (float)(div*currentColourIndex));
                 //String addString = String.valueOf(next.getAttribute("signature"));
                 next.setAttribute("signature1", String.valueOf(degree));
             }
             System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
             sleep();
         }
-
         exploreGraph = false;
         System.out.println("End of Exploration");
     }
@@ -245,6 +262,7 @@ public class TestGraphColour implements ViewerListener {
         Iterator<? extends Node> k = source.getBreadthFirstIterator();
         Iterator<? extends Node> j = source.getBreadthFirstIterator();
         Iterator<? extends Node> i = source.getBreadthFirstIterator();
+        colorChanges = false;
         colourTable.clear();
         colourIndex = 0;
         int currentColourIndex = -1;
@@ -262,7 +280,7 @@ public class TestGraphColour implements ViewerListener {
             sleep();
         }
 
-        String currentSignature = String.valueOf(source.getAttribute("signature"+(round+1)));
+        String currentSignature = String.valueOf(source.getAttribute("signature"+(round)));
 
         if (currentSignature != null){
             if (colourTable.containsKey(currentSignature)){
@@ -275,7 +293,7 @@ public class TestGraphColour implements ViewerListener {
         // - rest of the node
         while (k.hasNext()) {
             Node next = k.next();
-            currentSignature = String.valueOf(next.getAttribute("signature"+(round+1)));
+            currentSignature = String.valueOf(next.getAttribute("signature"+(round)));
             
             if (currentSignature != null){
                 if (colourTable.containsKey(currentSignature)){
@@ -292,33 +310,62 @@ public class TestGraphColour implements ViewerListener {
         
         while(j.hasNext()){
             Node next = j.next();
-            currentSignature = String.valueOf(next.getAttribute("signature"+(round+1)));
-            float div = 1/(float)(colourTable.size()-1);
+            currentSignature = String.valueOf(next.getAttribute("signature"+(round)));
+            double div = 1/(double)(colourTable.size()-1);
             currentColourIndex = colourTable.get(currentSignature);     
-            next.setAttribute("ui.color", div*(currentColourIndex));
+            next.setAttribute("ui.color", (float)(div*currentColourIndex));
             System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
             sleep();
+        }
+        System.out.println("previousSize= "+ previousSize + "and currentSize= " + colourTable.size());
+        if (previousSize != colourTable.size()){
+            colorChanges = true;
+            previousSize = colourTable.size();
+        } else {
+            //previousSize = colourTable.size();
         }
 
         exploreGraph2 = false;
         System.out.println("End of Exploration");
     }
 
+    public void cRefinement(Graph graph){
+        Node startNode = computeCentroid(graph);
+        if (exploreGraph) {explore(startNode);}
+        if (colorChanges){
+            round += 1;
+            nextExplore(startNode);
+            sleep();
+        } else {
+            cRefinementGoing = false;
+        }
+        System.out.println("End of Colour Refinement");
+    }
+
     public void checkNode(Node source){
         System.out.println(source);
         Stream<Node> neighbourNodes = source.neighborNodes();
-        String currentSignature = String.valueOf(source.getAttribute("signature"+round));
+        String currentSignature = String.valueOf(source.getAttribute("signature"+(round-1)));
         String currentDegree = currentSignature.substring(0,1);
         StringBuilder neighbourSignature = new StringBuilder();
         neighbourNodes.forEach(neighbourNode -> {
-            neighbourSignature.append(String.valueOf(neighbourNode.getAttribute("signature"+round)));
-            System.out.println("Neighbor color signature: " + neighbourSignature);
-            System.out.println("Current Signature: " + String.valueOf(currentDegree) + neighbourSignature);
+            neighbourSignature.append(String.valueOf(neighbourNode.getAttribute("signature"+(round-1))));
+            //System.out.println("Neighbor color signature: " + neighbourSignature);
+            //System.out.println("Current Signature: " + String.valueOf(currentDegree) + neighbourSignature);
         });
         String sortedNeighbourSignature = createSortedSignature(neighbourSignature.toString());
         neighbourSignature.setLength(0);
-        source.setAttribute("signature"+(round+1), currentDegree + sortedNeighbourSignature);
-        System.out.println("Done set for node= "+ source);
+        source.setAttribute("signature"+(round), currentDegree + sortedNeighbourSignature);
+        //System.out.println("Done set for node= "+ source);
+    }
+
+    public void checkNode2(Node source){
+        System.out.println(source);
+        String currentSignature = String.valueOf(source.getAttribute("signature"+(round)));
+        //String currentDegree = currentSignature.substring(0,1);
+        float currentColor = (float)source.getAttribute("ui.color");
+        System.out.println(source + " current color is "+ currentColor);
+        System.out.println(source + " current signature is "+ currentSignature);
     }
 
     protected void sleep() {

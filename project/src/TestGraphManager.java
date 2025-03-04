@@ -18,7 +18,7 @@ public class TestGraphManager{
                 "}" +
                 "node.colour {" +
                 "   fill-mode: dyn-plain;" +
-                "   fill-color: red, green, blue, purple;" +
+                "   fill-color: red, green, blue, magenta;" +
                 "}" +
                 "node.colour0 {" +
                 "   fill-color: gray;" +
