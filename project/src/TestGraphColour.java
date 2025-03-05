@@ -131,16 +131,14 @@ public class TestGraphColour implements ViewerListener {
             fromViewer.pump();
             if (exploreGraph) {
                 explore(computeCentroid(graph));
-            };
+            }; 
             if (exploreGraph2) {
                 nextExplore(computeCentroid(graph));
             };
             if (cRefinementGoing){
                 cRefinement(graph);
             }
-        }
-
-        
+        }  
     }
 
     public void buttonReleased(String id) {
@@ -166,11 +164,8 @@ public class TestGraphColour implements ViewerListener {
         Node clickedNode = currentGraph.getNode(id);
         String currentClass = (String)clickedNode.getAttribute("ui.class");
 
-        //check neighbour
-        int hehe = clickedNode.getDegree();
-        System.out.println("number of neightbour="+ hehe);
-        //debugginh purpose
-        checkNode2(clickedNode);
+        //debugging purpose
+        getNodeInformation(clickedNode);
 
         // Check if the clicked node ID exists in graph1
         if (!currentClass.equals("unmarked")) {
@@ -207,21 +202,7 @@ public class TestGraphColour implements ViewerListener {
         int currentColourIndex = -1;
         int degree = source.getDegree();
 
-        // Assign each node with colour attribute
-        // - First node
-        if (degree >= 0){
-            if (colourTable.containsKey(String.valueOf(degree))){
-                source.setAttribute("ui.class", "colour");
-            }else {
-                colourTable.put(String.valueOf(degree), colourIndex);
-                source.setAttribute("ui.class", "colour");
-                colourIndex += 1;
-                colorChanges = true;
-            }
-        } else {source.setAttribute("ui.class", "colour0"); }
-
-
-        // - rest of the node
+        // Check Neighbour Nodes
         while (k.hasNext()) {
             Node next = k.next();
             degree = next.getDegree();
@@ -267,50 +248,29 @@ public class TestGraphColour implements ViewerListener {
         colourIndex = 0;
         int currentColourIndex = -1;
 
-        //Stream<Node> neighbourNodes = source.neighborNodes();
-
-        // Assign each node with signature attribute
-        // - First node
-        System.out.println("source . . . . . . . . . . . ");
-        checkNode(source);
+        // Update each node with signature attribute
         while (i.hasNext()){
             Node next = i.next();
             System.out.println(next + " . . . . . . . . . . . ");
-            checkNode(next);
+            updateSignature(next);
             sleep();
         }
 
-        String currentSignature = String.valueOf(source.getAttribute("signature"+(round)));
-
-        if (currentSignature != null){
-            if (colourTable.containsKey(currentSignature)){
-                //do nothing
-            }else {
-                colourTable.put(currentSignature, colourIndex);
-                colourIndex += 1;
-            }
-        }
         // - rest of the node
         while (k.hasNext()) {
             Node next = k.next();
-            currentSignature = String.valueOf(next.getAttribute("signature"+(round)));
+            String currentSignature = String.valueOf(next.getAttribute("signature"+(round)));
             
-            if (currentSignature != null){
-                if (colourTable.containsKey(currentSignature)){
-                    //do nothing
-                }else {
-                    colourTable.put(currentSignature, colourIndex);
-                    colourIndex += 1;
-                }
+            if (currentSignature != null && !colourTable.containsKey(currentSignature)) {
+                colourTable.put(currentSignature, colourIndex++);
             }
         }
         System.out.println("Assigned signature attribute to the nodes");
         
         // Colour the nodes
-        
         while(j.hasNext()){
             Node next = j.next();
-            currentSignature = String.valueOf(next.getAttribute("signature"+(round)));
+            String currentSignature = String.valueOf(next.getAttribute("signature"+(round)));
             double div = 1/(double)(colourTable.size()-1);
             currentColourIndex = colourTable.get(currentSignature);     
             next.setAttribute("ui.color", (float)(div*currentColourIndex));
@@ -318,15 +278,14 @@ public class TestGraphColour implements ViewerListener {
             sleep();
         }
         System.out.println("previousSize= "+ previousSize + "and currentSize= " + colourTable.size());
+
         if (previousSize != colourTable.size()){
             colorChanges = true;
             previousSize = colourTable.size();
-        } else {
-            //previousSize = colourTable.size();
         }
 
         exploreGraph2 = false;
-        System.out.println("End of Exploration");
+        System.out.println("End of Round "+ round);
     }
 
     public void cRefinement(Graph graph){
@@ -342,7 +301,7 @@ public class TestGraphColour implements ViewerListener {
         System.out.println("End of Colour Refinement");
     }
 
-    public void checkNode(Node source){
+    public void updateSignature(Node source){
         System.out.println(source);
         Stream<Node> neighbourNodes = source.neighborNodes();
         String currentSignature = String.valueOf(source.getAttribute("signature"+(round-1)));
@@ -359,11 +318,11 @@ public class TestGraphColour implements ViewerListener {
         //System.out.println("Done set for node= "+ source);
     }
 
-    public void checkNode2(Node source){
+    public void getNodeInformation(Node source){
         System.out.println(source);
         String currentSignature = String.valueOf(source.getAttribute("signature"+(round)));
-        //String currentDegree = currentSignature.substring(0,1);
         float currentColor = (float)source.getAttribute("ui.color");
+        System.out.println("Current node has "+ String.valueOf(source.getDegree()) +"neighrbours");
         System.out.println(source + " current color is "+ currentColor);
         System.out.println(source + " current signature is "+ currentSignature);
     }
@@ -372,22 +331,6 @@ public class TestGraphColour implements ViewerListener {
         try { Thread.sleep(100); } catch (Exception e) {}
     }
 
-    // Old method. Delete after trial
-    public static boolean isSameSignature(String a, String b) {
-        if (a.length() != b.length()) {
-            return false;
-        }
-
-        char[] aChars = a.toCharArray();
-        char[] bChars = b.toCharArray();
-
-        Arrays.sort(aChars);
-        Arrays.sort(bChars);
-
-        return Arrays.equals(aChars, bChars);
-    }
-
-    // New Method 
     public static String createSortedSignature(String s) {
         char[] chars = s.toCharArray();
         Arrays.sort(chars);
