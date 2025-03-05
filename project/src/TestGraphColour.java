@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -14,6 +15,7 @@ import java.util.stream.Stream;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.graphstream.algorithm.APSP;
@@ -56,9 +58,14 @@ public class TestGraphColour implements ViewerListener {
         JFrame frame = new JFrame("Test Ground");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        JPanel headerPanel = new JPanel(new FlowLayout());
+        headerPanel.setBackground(Color.GRAY);
+
         JPanel buttonPanel = new JPanel(new FlowLayout());
         JPanel centerPanel = new JPanel(new GridLayout(1, 2));
         centerPanel.add((Component) view);
+
+        JLabel roundTitle = new JLabel("Round 0");
 
         JButton myButton5 = new JButton("Change Round");
         myButton5.addActionListener(new ActionListener() {
@@ -76,7 +83,7 @@ public class TestGraphColour implements ViewerListener {
                 round -= 1;
                 setIteration(computeCentroid(graph), round);
                 System.out.println("======================== ");
-                myButton5.setText("Round " + round);
+                roundTitle.setText("Round " + round);
             }
         });
 
@@ -88,7 +95,7 @@ public class TestGraphColour implements ViewerListener {
                 round += 1;
                 setIteration(computeCentroid(graph), round);
                 System.out.println("======================== ");
-                myButton5.setText("Round " + round);
+                roundTitle.setText("Round " + round);
             }
         });
         JButton myButton6 = new JButton("Colour Refinement");
@@ -101,14 +108,16 @@ public class TestGraphColour implements ViewerListener {
             }
         });
 
+        headerPanel.add(roundTitle);
+
         buttonPanel.add(myButton3);
         buttonPanel.add(myButton4);
         buttonPanel.add(myButton5);
         buttonPanel.add(myButton6);
 
-
         frame.add(centerPanel, BorderLayout.CENTER);
         frame.add(buttonPanel, BorderLayout.SOUTH);
+        frame.add(headerPanel, BorderLayout.NORTH);
         frame.setPreferredSize(new Dimension(800, 600));
         frame.pack();
         frame.setLocationRelativeTo(null);
