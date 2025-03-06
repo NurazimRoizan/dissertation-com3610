@@ -31,8 +31,8 @@ public class TestGraphColour implements ViewerListener {
     protected Graph graph, currentGraph;
     protected boolean loop = true;
     protected String colourMode = "marked";
-    protected boolean exploreGraph = false;
-    protected boolean exploreGraph2 = false;
+    protected boolean startIteration = false;
+    protected boolean nextIteration = false;
     protected boolean cRefinementGoing = false;
     protected int colourIndex = 0;
     protected int round = 1;
@@ -106,7 +106,7 @@ public class TestGraphColour implements ViewerListener {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Starting Colour Refinement . . . .");
                 cRefinementGoing = true;
-                exploreGraph = true;
+                startIteration = true;
                 myButton6.setVisible(false);
                 myButton3.setVisible(true);
                 myButton4.setVisible(true);
@@ -150,10 +150,10 @@ public class TestGraphColour implements ViewerListener {
 
         while (loop) {
             fromViewer.pump();
-            if (exploreGraph) {
+            if (startIteration) {
                 explore(computeCentroid(graph));
             }; 
-            if (exploreGraph2) {
+            if (nextIteration) {
                 nextExplore(computeCentroid(graph));
             };
             if (cRefinementGoing){
@@ -258,7 +258,7 @@ public class TestGraphColour implements ViewerListener {
             //System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
             sleep();
         }
-        exploreGraph = false;
+        startIteration = false;
         roundTitle.setText("Round " + round);
         System.out.println("End of 1st iteration");
     }
@@ -313,14 +313,14 @@ public class TestGraphColour implements ViewerListener {
             previousSize = colourTable.size();
         }
 
-        exploreGraph2 = false;
+        nextIteration = false;
         roundTitle.setText("Round " + round);
         System.out.println("End of Round "+ round);
     }
 
     public void cRefinement(Graph graph){
         Node startNode = computeCentroid(graph);
-        if (exploreGraph) {explore(startNode);}
+        if (startIteration) {explore(startNode);}
         if (colorChanges){
             round += 1;
             nextExplore(startNode);

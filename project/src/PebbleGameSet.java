@@ -175,6 +175,6 @@ public class PebbleGameSet implements ViewerListener {
     }
 
     protected void sleep() {
-        try { Thread.sleep(1000); } catch (Exception e) {}
+        try { Thread.sleep(100); } catch (Exception e) {}
     }
 }
