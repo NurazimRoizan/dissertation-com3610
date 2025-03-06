@@ -29,6 +29,7 @@ public class App implements ViewerListener {
     protected boolean exploreGraph = false; //old
     protected ColourRefinementAlgorithm cRefineGraph;
     protected boolean cRefinementGoing = false;
+    protected JLabel currentLabel;
 
     public static void main(String args[]) {
         System.setProperty("org.graphstream.ui", "swing");
@@ -87,7 +88,9 @@ public class App implements ViewerListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Exploring . . .");
-                cRefineGraph = new ColourRefinementAlgorithm(graphLabel1, currentGraph);
+                if (currentGraph.equals(graph)){currentLabel = graphLabel1;}
+                if (currentGraph.equals(graph2)){currentLabel = graphLabel2;}
+                cRefineGraph = new ColourRefinementAlgorithm(currentLabel, currentGraph);
                 cRefineGraph.setCRefinementGoing(true);
             }
         });
@@ -143,7 +146,6 @@ public class App implements ViewerListener {
             fromViewer2.pump();
             if (cRefineGraph != null){
                 if (cRefineGraph.getCRefinementGoing()){
-                    System.out.println("you should run crefinement now");
                     cRefineGraph.cRefinement(currentGraph);
                 }
             }
@@ -180,16 +182,6 @@ public class App implements ViewerListener {
 	public void mouseLeft(String id) {
 		System.out.println("Need the Mouse Options to be activated");
 	}
-
-    public void explore(Node source) {
-        Iterator<? extends Node> k = source.getBreadthFirstIterator();
-    
-        while (k.hasNext()) {
-            Node next = k.next();
-            next.setAttribute("ui.class", "marked");
-            sleep();
-        }
-    }
 
     protected void sleep() {
         try { Thread.sleep(100); } catch (Exception e) {}

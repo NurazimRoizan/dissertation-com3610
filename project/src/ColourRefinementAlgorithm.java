@@ -38,13 +38,15 @@ public class ColourRefinementAlgorithm {
         Node startNode = computeCentroid(graph);
         if (startIteration) {startup(startNode);}
         if (colorChanges){
+            System.out.println("There is color changes. Starting new round . . .");
             round += 1;
             nextRound(startNode);
             sleep();
         } else {
+            System.out.println("Algorithm now stable");
             cRefinementGoing = false;
+            System.out.println("End of Colour Refinement");
         }
-        System.out.println("End of Colour Refinement");
     }
 
     public void startup(Node source) {
