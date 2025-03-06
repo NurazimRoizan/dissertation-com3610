@@ -39,6 +39,7 @@ public class TestGraphColour implements ViewerListener {
     protected int previousSize = 0;
     protected boolean colorChanges = false;
     protected Map<String, Integer> colourTable = new HashMap<String, Integer>();
+    protected JLabel roundTitle = new JLabel("Round 1");
 
     public static void main(String args[]){
         System.setProperty("org.graphstream.ui", "swing");
@@ -65,9 +66,8 @@ public class TestGraphColour implements ViewerListener {
         JPanel centerPanel = new JPanel(new GridLayout(1, 2));
         centerPanel.add((Component) view);
 
-        JLabel roundTitle = new JLabel("Round 0");
-
-        JButton myButton5 = new JButton("Change Round");
+        JButton myButton5 = new JButton("Reset Round");
+        myButton5.setVisible(false);
         myButton5.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -76,6 +76,7 @@ public class TestGraphColour implements ViewerListener {
         });
 
         JButton myButton3 = new JButton("Back Iteration");
+        myButton3.setVisible(false);
         myButton3.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -88,6 +89,7 @@ public class TestGraphColour implements ViewerListener {
         });
 
         JButton myButton4 = new JButton("Next Iteration");
+        myButton4.setVisible(false);
         myButton4.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -105,6 +107,10 @@ public class TestGraphColour implements ViewerListener {
                 System.out.println("Starting Colour Refinement . . . .");
                 cRefinementGoing = true;
                 exploreGraph = true;
+                myButton6.setVisible(false);
+                myButton3.setVisible(true);
+                myButton4.setVisible(true);
+                myButton5.setVisible(true);
             }
         });
 
@@ -251,6 +257,7 @@ public class TestGraphColour implements ViewerListener {
             sleep();
         }
         exploreGraph = false;
+        roundTitle.setText("Round " + round);
         System.out.println("End of 1st iteration");
     }
 
@@ -268,7 +275,6 @@ public class TestGraphColour implements ViewerListener {
         while (i.hasNext()){
             Node next = i.next();
             updateSignature(next);
-            sleep();
         }
 
         // - rest of the node
@@ -302,6 +308,7 @@ public class TestGraphColour implements ViewerListener {
         }
 
         exploreGraph2 = false;
+        roundTitle.setText("Round " + round);
         System.out.println("End of Round "+ round);
     }
 
