@@ -24,9 +24,15 @@ public class TestGraphManager{
                 "node.colour0 {" +
                 "   fill-color: gray;" +
                 "}" +
-                "node.interpo {" +
-                "   fill-mode: dyn-plain;" +
-                "   fill-color: blue, red, green;" +
+                "node.spoiler {" +
+                "   stroke-mode: dots;" +
+                "   stroke-color: blue;" +
+                "   stroke-width: 2px;" +
+                "}" +
+                "node.duplicator {" +
+                "   stroke-mode: dots;" +
+                "   stroke-color: red;" +
+                "   stroke-width: 2px;" +
                 "}" +
                 "edge {" +
                 "   fill-color: brown;" +

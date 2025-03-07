@@ -6,7 +6,6 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
-import java.util.Iterator;
 import java.awt.FlowLayout;
 
 import javax.swing.JButton;
@@ -29,7 +28,7 @@ public class App implements ViewerListener {
     protected boolean exploreGraph = false; //old
     protected ColourRefinementAlgorithm cRefineGraph;
     protected boolean cRefinementGoing = false;
-    protected JLabel currentLabel;
+    protected JLabel currentLabel, graphLabel1, graphLabel2;
 
     public static void main(String args[]) {
         System.setProperty("org.graphstream.ui", "swing");
@@ -71,7 +70,7 @@ public class App implements ViewerListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Spoiler now can mark the node");
-                colourMode = "marked3";
+                colourMode = "spoiler";
             }
         });
         JButton duplicatorMark = new JButton("Duplicator Move");
@@ -79,7 +78,7 @@ public class App implements ViewerListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Duplicator now can mark the node");
-                colourMode = "marked2";
+                colourMode = "duplicator";
             }
         });
 
@@ -88,9 +87,7 @@ public class App implements ViewerListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Exploring . . .");
-                if (currentGraph.equals(graph)){currentLabel = graphLabel1;}
-                if (currentGraph.equals(graph2)){currentLabel = graphLabel2;}
-                cRefineGraph = new ColourRefinementAlgorithm(currentLabel, currentGraph);
+                cRefineGraph = new ColourRefinementAlgorithm(currentLabel);
                 cRefineGraph.setCRefinementGoing(true);
             }
         });
@@ -112,12 +109,14 @@ public class App implements ViewerListener {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 System.out.println("Clicked on graph1");
                 currentGraph = graph;
+                currentLabel = graphLabel1;
             }
 
             // ... other MouseListener methods ...
             @Override
             public void mouseEntered(java.awt.event.MouseEvent e) {
                 currentGraph = graph;
+                currentLabel = graphLabel1;
             }
         });
 
@@ -126,11 +125,13 @@ public class App implements ViewerListener {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 System.out.println("Clicked on graph2");
                 currentGraph = graph2;
+                currentLabel = graphLabel2;
             }
 
             @Override
             public void mouseEntered(java.awt.event.MouseEvent e) {
                 currentGraph = graph2;
+                currentLabel = graphLabel2;
             }
         });
 
@@ -158,17 +159,32 @@ public class App implements ViewerListener {
 		loop = false;
 	}
 
+    float colourTemp =  -1;
+    Object classTemp;
 	public void buttonPushed(String id) {
 		System.out.println("Button pushed on node "+id);
-        // Toggle the color between green and the original color
         Node clickedNode = currentGraph.getNode(id);
-        // Check if the clicked node ID exists in graph1
-        String currentClass = (String)clickedNode.getAttribute("ui.class");
-        if (currentClass.equals(colourMode)) {
-            clickedNode.setAttribute("ui.class", "unmarked");
-        } else {
-            clickedNode.setAttribute("ui.class", colourMode);
+        String currentClass = String.valueOf(clickedNode.getAttribute("ui.class"));
+
+        if (!"marked".equals(colourMode)) { 
+            if (currentClass.equals("colour") && !currentClass.equals(colourMode)) {
+                clickedNode.setAttribute("ui.class", colourMode, "colour");
+            } else if (currentClass.equals("unmarked")) {
+                clickedNode.setAttribute("ui.class", colourMode);
+            } else if (currentClass.equals(colourMode)) {
+                clickedNode.setAttribute("ui.class", "unmarked");
+            } else {
+                clickedNode.setAttribute("ui.class", clickedNode.hasAttribute("ui.color") ? "colour" : "unmarked");
+            }
+        }else {
+            if (clickedNode.hasAttribute("ui.color")) {
+                getNodeInformation(clickedNode); // Only called when ui.color exists
+                clickedNode.setAttribute("ui.class", currentClass.equals("colour") ? "unmarked" : "colour");
+            } else {
+                clickedNode.setAttribute("ui.class", currentClass.equals("marked") ? "unmarked" : "marked");
+            }
         }
+        
 	}
 
 	public void buttonReleased(String id) {
@@ -182,6 +198,17 @@ public class App implements ViewerListener {
 	public void mouseLeft(String id) {
 		System.out.println("Need the Mouse Options to be activated");
 	}
+
+    public void getNodeInformation(Node source){
+        System.out.println(source);
+        String currentRound = currentLabel.getText().substring(currentLabel.getText().length()-1);
+        System.out.println(currentRound);
+        String currentSignature = String.valueOf(source.getAttribute("signature"+currentRound));
+        float currentColor = (float)source.getAttribute("ui.color");
+        System.out.println("Current node has "+ String.valueOf(source.getDegree()) +"neighbours");
+        System.out.println(source + " current color is "+ currentColor);
+        System.out.println(source + " current signature is "+ currentSignature);
+    }
 
     protected void sleep() {
         try { Thread.sleep(100); } catch (Exception e) {}

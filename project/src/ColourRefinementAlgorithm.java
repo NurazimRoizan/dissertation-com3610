@@ -20,9 +20,8 @@ public class ColourRefinementAlgorithm {
     private JLabel roundTitle;
     private int round;
     private int previousSize;
-    private Graph graph;
 
-    public ColourRefinementAlgorithm(JLabel roundTitle, Graph graph) {
+    public ColourRefinementAlgorithm(JLabel roundTitle) {
         this.colourTable = new HashMap<>(); // Initialize the map
         this.colourIndex = 0;
         this.colorChanges = false; // Initialize
@@ -31,7 +30,6 @@ public class ColourRefinementAlgorithm {
         this.roundTitle = roundTitle;
         this.round = 1;
         this.previousSize = 0;
-        this.graph = graph;
     }
 
     public void cRefinement(Graph graph){
