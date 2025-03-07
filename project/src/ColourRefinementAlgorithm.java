@@ -188,6 +188,41 @@ public class ColourRefinementAlgorithm {
         return graph.getNode(currentCentroid);
     }
 
+    public void setIteration(Graph graph, int desiredRound){
+        Node startNode = computeCentroid(graph);
+        Iterator<? extends Node> j = startNode.getBreadthFirstIterator();
+        Iterator<? extends Node> k = startNode.getBreadthFirstIterator();
+        colourTable.clear();
+        int colourIndex = 0;
+        int currentColourIndex = -1;
+
+        while (k.hasNext()) {
+            Node next = k.next();
+            String currentSignature = String.valueOf(next.getAttribute("signature"+(desiredRound)));
+            
+            if (currentSignature != null && !colourTable.containsKey(currentSignature)) {
+                colourTable.put(currentSignature, colourIndex++);
+            }
+        }
+        System.out.println("Assigned colorTable attribute to the nodes");
+
+        // Colour the nodes
+        System.out.println("Colouring the nodes");
+
+        while(j.hasNext()){
+            Node next = j.next();
+            String currentSignature = String.valueOf(next.getAttribute("signature"+(desiredRound)));
+            double div = 1/(double)(colourTable.size()-1);
+            currentColourIndex = colourTable.get(currentSignature);     
+            next.setAttribute("ui.color", (float)(div*currentColourIndex));
+            //For debugging
+            //System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
+            sleep();
+        }
+        System.out.println("current table size is " + colourTable.size());
+        System.out.println("Currently showing round number "+ desiredRound);
+    }
+
     public void setCRefinementGoing(boolean onxon){
         this.cRefinementGoing=onxon;
     }

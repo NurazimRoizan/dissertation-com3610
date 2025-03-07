@@ -8,11 +8,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.FlowLayout;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.EtchedBorder;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -65,36 +70,81 @@ public class App implements ViewerListener {
         centerPanel.add((Component) view);
         centerPanel.add((Component) view2);
 
-        JButton spoilerMark = new JButton("Spoiler Move");
+        JToggleButton spoilerMark = new JToggleButton("Spoiler Move");
+        JToggleButton duplicatorMark = new JToggleButton("Duplicator Move");
+        
+        Border emptyBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
+        //spoilerMark.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED, Color.CYAN, Color.DARK_GRAY), emptyBorder));
+        //duplicatorMark.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED, Color.RED, Color.DARK_GRAY), emptyBorder));
         spoilerMark.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Spoiler now can mark the node");
-                colourMode = "spoiler";
+                if (spoilerMark.isSelected()){
+                    duplicatorMark.setSelected(false);
+                    System.out.println("Spoiler now can mark the node");
+                    colourMode = "spoiler";
+                }else{
+                    colourMode = "marked";
+                }
             }
         });
-        JButton duplicatorMark = new JButton("Duplicator Move");
+    
         duplicatorMark.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Duplicator now can mark the node");
-                colourMode = "duplicator";
+                if (duplicatorMark.isSelected()){
+                    spoilerMark.setSelected(false);
+                    System.out.println("Duplicator now can mark the node");
+                    colourMode = "duplicator";
+                }else{
+                    colourMode = "marked";
+                }
+                
             }
         });
 
-        JButton myButton3 = new JButton("Explore");
+        JButton myButton3 = new JButton("Colour Refinement");
+        myButton3.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, Color.YELLOW, Color.ORANGE, Color.RED, Color.BLUE), emptyBorder));
+
         myButton3.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Exploring . . .");
+                System.out.println("Starting Algorithm . . .");
                 cRefineGraph = new ColourRefinementAlgorithm(currentLabel);
                 cRefineGraph.setCRefinementGoing(true);
+            }
+        });
+        JButton myButton5 = new JButton("Back Iteration");
+        //myButton5.setVisible(false);
+        myButton5.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Moving back in time . . .");
+                int currentRound = Integer.parseInt(currentLabel.getText().substring(currentLabel.getText().length()-1))-1;
+                cRefineGraph.setIteration(currentGraph, currentRound);
+                System.out.println("======================== ");
+                currentLabel.setText("Round " + currentRound);
+            }
+        });
+
+        JButton myButton4 = new JButton("Next Iteration");
+        //myButton4.setVisible(false);
+        myButton4.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Going forward in time . . .");
+                int currentRound = Integer.parseInt(currentLabel.getText().substring(currentLabel.getText().length()-1))+1;
+                cRefineGraph.setIteration(currentGraph, currentRound);
+                System.out.println("======================== ");
+                currentLabel.setText("Round " + currentRound);
             }
         });
 
         buttonPanel.add(spoilerMark);
         buttonPanel.add(duplicatorMark);
         buttonPanel.add(myButton3);
+        buttonPanel.add(myButton4);
+        buttonPanel.add(myButton5);
 
         frame.add(headerPanel, BorderLayout.NORTH);
         frame.add(centerPanel, BorderLayout.CENTER);
