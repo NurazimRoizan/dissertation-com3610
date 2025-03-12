@@ -20,8 +20,9 @@ public class ColourRefinementAlgorithm {
     private JLabel roundTitle;
     private int round;
     private int previousSize;
+    private int sleep;
 
-    public ColourRefinementAlgorithm(JLabel roundTitle) {
+    public ColourRefinementAlgorithm(JLabel roundTitle, int sleep) {
         this.colourTable = new HashMap<>(); // Initialize the map
         this.colourIndex = 0;
         this.colorChanges = false; // Initialize
@@ -30,6 +31,7 @@ public class ColourRefinementAlgorithm {
         this.roundTitle = roundTitle;
         this.round = 1;
         this.previousSize = 0;
+        this.sleep = sleep;
     }
 
     public void cRefinement(Graph graph){
@@ -39,7 +41,6 @@ public class ColourRefinementAlgorithm {
             System.out.println("There is color changes. Starting new round . . .");
             round += 1;
             nextRound(startNode);
-            sleep();
         } else {
             System.out.println("Algorithm now stable");
             cRefinementGoing = false;
@@ -86,7 +87,7 @@ public class ColourRefinementAlgorithm {
                 next.setAttribute("signature1", String.valueOf(degree));
             }
             //System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
-            sleep();
+            sleep(sleep);
         }
         startIteration = false;
         roundTitle.setText("Round " + round);
@@ -134,7 +135,7 @@ public class ColourRefinementAlgorithm {
             next.setAttribute("ui.color", (float)(div*currentColourIndex));
             //for debugging
             //System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
-            sleep();
+            sleep(sleep);
         }
         System.out.println("previousSize= "+ previousSize + "and currentSize= " + colourTable.size());
 
@@ -217,7 +218,6 @@ public class ColourRefinementAlgorithm {
             next.setAttribute("ui.color", (float)(div*currentColourIndex));
             //For debugging
             //System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
-            sleep();
         }
         System.out.println("current table size is " + colourTable.size());
         System.out.println("Currently showing round number "+ desiredRound);
@@ -230,7 +230,7 @@ public class ColourRefinementAlgorithm {
         return this.cRefinementGoing;
     }
 
-    protected void sleep() {
-        try { Thread.sleep(100); } catch (Exception e) {}
+    protected void sleep(int milisec) {
+        try { Thread.sleep(milisec); } catch (Exception e) {}
     }
 }

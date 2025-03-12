@@ -13,11 +13,15 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -34,6 +38,7 @@ public class App implements ViewerListener {
     protected ColourRefinementAlgorithm cRefineGraph;
     protected boolean cRefinementGoing = false;
     protected JLabel currentLabel, graphLabel1, graphLabel2;
+    protected int sleepTime = 100;
 
     public static void main(String args[]) {
         System.setProperty("org.graphstream.ui", "swing");
@@ -74,8 +79,6 @@ public class App implements ViewerListener {
         JToggleButton duplicatorMark = new JToggleButton("Duplicator Move");
         
         Border emptyBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
-        //spoilerMark.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED, Color.CYAN, Color.DARK_GRAY), emptyBorder));
-        //duplicatorMark.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED, Color.RED, Color.DARK_GRAY), emptyBorder));
         spoilerMark.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -110,7 +113,7 @@ public class App implements ViewerListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Starting Algorithm . . .");
-                cRefineGraph = new ColourRefinementAlgorithm(currentLabel);
+                cRefineGraph = new ColourRefinementAlgorithm(currentLabel, sleepTime);
                 cRefineGraph.setCRefinementGoing(true);
             }
         });
@@ -140,11 +143,27 @@ public class App implements ViewerListener {
             }
         });
 
+        SpinnerNumberModel model = new SpinnerNumberModel(100, 0, 1000, 20); // Initial: 50, Min: 0, Max: 100, Step: 5
+        JSpinner speedSpinner = new JSpinner(model);
+
+        speedSpinner.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                int speed = (int) speedSpinner.getValue();
+                System.out.println("Speed: " + speed);
+                sleepTime = speed;
+
+            }
+        });
+
         buttonPanel.add(spoilerMark);
         buttonPanel.add(duplicatorMark);
         buttonPanel.add(myButton3);
-        buttonPanel.add(myButton4);
         buttonPanel.add(myButton5);
+        buttonPanel.add(myButton4);
+        JLabel speedLabel = new JLabel("Speed: "); // Create the label
+        buttonPanel.add(speedLabel);
+        buttonPanel.add(speedSpinner);
+
 
         frame.add(headerPanel, BorderLayout.NORTH);
         frame.add(centerPanel, BorderLayout.CENTER);
