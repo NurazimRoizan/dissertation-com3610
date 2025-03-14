@@ -8,9 +8,10 @@ public class TestGraphManager{
         "node {" +
                 // "     shape: box;" +
                 "   stroke-mode: plain;" +
+                //"   text-color: white;" +
                 "   size: 10px, 15px;" +
                 "   stroke-color: yellow;" +
-                "   size: 20px; fill-color: rgb(100,255,100), rgba(50,50,50,0); fill-mode: gradient-radial;" +
+                "   size: 20px; fill-color: rgb(100,255,100), rgba(255, 255, 255, 0); fill-mode: gradient-radial;" +
                 // "   shadow-mode: gradient-radial; shadow-width: 5px; shadow-color: #EEF, #000; shadow-offset: 2px;" +
                 "}" +
                 "node.marked {" +
@@ -25,12 +26,12 @@ public class TestGraphManager{
                 "   fill-color: gray;" +
                 "}" +
                 "node.spoiler {" +
-                "   stroke-mode: dots;" +
+                "   stroke-mode: plain;" +
                 "   stroke-color: blue;" +
                 "   stroke-width: 2px;" +
                 "}" +
                 "node.duplicator {" +
-                "   stroke-mode: dots;" +
+                "   stroke-mode: plain;" +
                 "   stroke-color: red;" +
                 "   stroke-width: 2px;" +
                 "}" +
@@ -43,10 +44,10 @@ public class TestGraphManager{
                 "   fill-mode: gradient-vertical;" +
                 "}";
     
-    public static Graph createGraph(String name) {
-        //DorogovtsevMendesGenerator gen = new DorogovtsevMendesGenerator();
+    public static Graph createGraph(String name, Generator gen) {
+        //Generator gen = new DorogovtsevMendesGenerator();
         //Generator gen = new BananaTreeGenerator();
-        Generator gen = new BarabasiAlbertGenerator(1);
+        //Generator gen = new BarabasiAlbertGenerator(1);
         Graph graph = new SingleGraph(name);
         gen.addSink(graph);
         gen.begin();

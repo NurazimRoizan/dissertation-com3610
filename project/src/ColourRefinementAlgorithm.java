@@ -45,6 +45,7 @@ public class ColourRefinementAlgorithm {
             System.out.println("Algorithm now stable");
             cRefinementGoing = false;
             System.out.println("End of Colour Refinement");
+            roundTitle.setText("Round " + (round-1));
         }
     }
 

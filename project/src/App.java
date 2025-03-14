@@ -6,6 +6,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
+import java.time.temporal.JulianFields;
 import java.awt.FlowLayout;
 
 import javax.swing.BorderFactory;
@@ -19,7 +20,6 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
-import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -29,6 +29,7 @@ import org.graphstream.ui.swing_viewer.ViewPanel;
 import org.graphstream.ui.swing_viewer.SwingViewer;
 import org.graphstream.ui.view.ViewerListener;
 import org.graphstream.ui.view.ViewerPipe;
+import org.graphstream.algorithm.generator.*;
 
 public class App implements ViewerListener {
     protected boolean loop = true;
@@ -37,7 +38,7 @@ public class App implements ViewerListener {
     protected boolean exploreGraph = false; //old
     protected ColourRefinementAlgorithm cRefineGraph;
     protected boolean cRefinementGoing = false;
-    protected JLabel currentLabel, graphLabel1, graphLabel2;
+    protected JLabel currentLabel, graphLabel1, graphLabel2, nodeInfoLabel;
     protected int sleepTime = 100;
 
     public static void main(String args[]) {
@@ -46,8 +47,10 @@ public class App implements ViewerListener {
     }
 
     public App() {
-        graph = TestGraphManager.createGraph("Graph A");
-        graph2 = TestGraphManager.createGraph("Graph B");
+        Generator gen = new BarabasiAlbertGenerator(1);
+        Generator gen2 = new DorogovtsevMendesGenerator();
+        graph = TestGraphManager.createGraph("Graph A", gen);
+        graph2 = TestGraphManager.createGraph("Graph B", gen2);
         currentGraph = graph;
 
         graph.setAutoCreate(true);
@@ -64,12 +67,18 @@ public class App implements ViewerListener {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel headerPanel = new JPanel(new GridLayout(1, 2));
+        JPanel bottomPanel = new JPanel(new GridLayout(2, 1));
         JPanel buttonPanel = new JPanel(new FlowLayout());
         JPanel centerPanel = new JPanel(new GridLayout(1, 2));
         JLabel graphLabel1 = new JLabel("Graph A", SwingConstants.CENTER);
         JLabel graphLabel2 = new JLabel("Graph B", SwingConstants.CENTER);
+        nodeInfoLabel = new JLabel("Click a node to get detailed attributes . . .", SwingConstants.CENTER);
 
-        headerPanel.setBackground(Color.GRAY);
+        javax.swing.border.Border border = BorderFactory.createLineBorder(Color.ORANGE, 3); 
+
+
+        headerPanel.setBackground(Color.LIGHT_GRAY);
+        bottomPanel.setBackground(Color.LIGHT_GRAY);
         headerPanel.add(graphLabel1);
         headerPanel.add(graphLabel2);
         centerPanel.add((Component) view);
@@ -143,7 +152,7 @@ public class App implements ViewerListener {
             }
         });
 
-        SpinnerNumberModel model = new SpinnerNumberModel(100, 0, 1000, 20); // Initial: 50, Min: 0, Max: 100, Step: 5
+        SpinnerNumberModel model = new SpinnerNumberModel(50, 0, 100, 10);
         JSpinner speedSpinner = new JSpinner(model);
 
         speedSpinner.addChangeListener(new ChangeListener() {
@@ -160,14 +169,17 @@ public class App implements ViewerListener {
         buttonPanel.add(myButton3);
         buttonPanel.add(myButton5);
         buttonPanel.add(myButton4);
-        JLabel speedLabel = new JLabel("Speed: "); // Create the label
+        JLabel speedLabel = new JLabel("Animation Delay: "); // Create the label
         buttonPanel.add(speedLabel);
         buttonPanel.add(speedSpinner);
+
+        bottomPanel.add(nodeInfoLabel);
+        bottomPanel.add(buttonPanel);
 
 
         frame.add(headerPanel, BorderLayout.NORTH);
         frame.add(centerPanel, BorderLayout.CENTER);
-        frame.add(buttonPanel, BorderLayout.SOUTH);
+        frame.add(bottomPanel, BorderLayout.SOUTH);
         frame.setPreferredSize(new Dimension(800, 600));
         frame.pack();
         frame.setLocationRelativeTo(null);
@@ -179,6 +191,8 @@ public class App implements ViewerListener {
                 System.out.println("Clicked on graph1");
                 currentGraph = graph;
                 currentLabel = graphLabel1;
+                view2.setBorder(null);
+                view.setBorder(border);
             }
 
             // ... other MouseListener methods ...
@@ -186,6 +200,8 @@ public class App implements ViewerListener {
             public void mouseEntered(java.awt.event.MouseEvent e) {
                 currentGraph = graph;
                 currentLabel = graphLabel1;
+                view2.setBorder(null);
+                view.setBorder(border);
             }
         });
 
@@ -195,12 +211,16 @@ public class App implements ViewerListener {
                 System.out.println("Clicked on graph2");
                 currentGraph = graph2;
                 currentLabel = graphLabel2;
+                view.setBorder(null);
+                view2.setBorder(border);
             }
 
             @Override
             public void mouseEntered(java.awt.event.MouseEvent e) {
                 currentGraph = graph2;
                 currentLabel = graphLabel2;
+                view.setBorder(null);
+                view2.setBorder(border);
             }
         });
 
@@ -247,7 +267,8 @@ public class App implements ViewerListener {
             }
         }else {
             if (clickedNode.hasAttribute("ui.color")) {
-                getNodeInformation(clickedNode); // Only called when ui.color exists
+                String nodeInfo = getNodeInformation(clickedNode); // Only called when ui.color exists
+                nodeInfoLabel.setText(nodeInfo);
                 clickedNode.setAttribute("ui.class", currentClass.equals("colour") ? "unmarked" : "colour");
             } else {
                 clickedNode.setAttribute("ui.class", currentClass.equals("marked") ? "unmarked" : "marked");
@@ -268,15 +289,34 @@ public class App implements ViewerListener {
 		System.out.println("Need the Mouse Options to be activated");
 	}
 
-    public void getNodeInformation(Node source){
-        System.out.println(source);
-        String currentRound = currentLabel.getText().substring(currentLabel.getText().length()-1);
-        System.out.println(currentRound);
-        String currentSignature = String.valueOf(source.getAttribute("signature"+currentRound));
-        float currentColor = (float)source.getAttribute("ui.color");
-        System.out.println("Current node has "+ String.valueOf(source.getDegree()) +"neighbours");
-        System.out.println(source + " current color is "+ currentColor);
-        System.out.println(source + " current signature is "+ currentSignature);
+    // public void getNodeInformation(Node source){
+    //     System.out.println(source);
+    //     String currentRound = currentLabel.getText().substring(currentLabel.getText().length()-1);
+    //     System.out.println(currentRound);
+    //     String currentSignature = String.valueOf(source.getAttribute("signature"+currentRound));
+    //     float currentColor = (float)source.getAttribute("ui.color");
+    //     System.out.println("Current node has "+ String.valueOf(source.getDegree()) +"neighbours");
+    //     System.out.println(source + " current color is "+ currentColor);
+    //     System.out.println(source + " current signature is "+ currentSignature);
+    // }
+
+    public String getNodeInformation(Node source) {
+        StringBuilder result = new StringBuilder();
+        
+        result.append("Clicked node '").append(source.toString());
+    
+        String currentRound = currentLabel.getText().substring(currentLabel.getText().length() - 1);
+        //result.append(currentRound).append("\n");
+    
+        String currentSignature = String.valueOf(source.getAttribute("signature" + currentRound));
+        currentSignature = currentSignature.length() > 10 ? currentSignature.substring(0, 10) : currentSignature;
+        float currentColor = (float) source.getAttribute("ui.color");
+    
+        result.append("' has ").append(String.valueOf(source.getDegree())).append(" neighbours. ");
+        result.append(" Color code = ").append(currentColor).append(". ");
+        result.append(" Current signature = ").append(currentSignature).append("\n");
+    
+        return result.toString();
     }
 
     protected void sleep() {

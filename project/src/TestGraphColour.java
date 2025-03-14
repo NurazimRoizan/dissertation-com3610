@@ -20,6 +20,9 @@ import javax.swing.JPanel;
 
 import org.graphstream.algorithm.APSP;
 import org.graphstream.algorithm.Centroid;
+import org.graphstream.algorithm.generator.BarabasiAlbertGenerator;
+import org.graphstream.algorithm.generator.DorogovtsevMendesGenerator;
+import org.graphstream.algorithm.generator.Generator;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.ui.swing_viewer.ViewPanel;
@@ -47,7 +50,8 @@ public class TestGraphColour implements ViewerListener {
     }
 
     public TestGraphColour() {
-        graph = TestGraphManager.createGraph("Graph Test");
+        Generator gen = new BarabasiAlbertGenerator(1);
+        graph = TestGraphManager.createGraph("Graph Test", gen);
         currentGraph = graph;
         graph.setAutoCreate(true);
         graph.setStrict(false);
@@ -359,7 +363,6 @@ public class TestGraphColour implements ViewerListener {
             next.setAttribute("ui.color", (float)(div*currentColourIndex));
             //For debugging
             //System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
-            sleep();
         }
         System.out.println("current table size is " + colourTable.size());
         System.out.println("Currently showing round number "+ desiredRound);
@@ -391,7 +394,7 @@ public class TestGraphColour implements ViewerListener {
     }
 
     protected void sleep() {
-        try { Thread.sleep(100); } catch (Exception e) {}
+        try { Thread.sleep(50); } catch (Exception e) {}
     }
 
     public static String createSortedSignature(String s) {
