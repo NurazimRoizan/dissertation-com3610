@@ -6,7 +6,6 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
-import java.time.temporal.JulianFields;
 import java.awt.FlowLayout;
 
 import javax.swing.BorderFactory;
@@ -267,14 +266,12 @@ public class App implements ViewerListener {
             }
         }else {
             if (clickedNode.hasAttribute("ui.color")) {
-                String nodeInfo = getNodeInformation(clickedNode); // Only called when ui.color exists
-                nodeInfoLabel.setText(nodeInfo);
                 clickedNode.setAttribute("ui.class", currentClass.equals("colour") ? "unmarked" : "colour");
             } else {
                 clickedNode.setAttribute("ui.class", currentClass.equals("marked") ? "unmarked" : "marked");
             }
         }
-        
+        nodeInfoLabel.setText(getNodeInformation(clickedNode));
 	}
 
 	public void buttonReleased(String id) {
@@ -289,33 +286,19 @@ public class App implements ViewerListener {
 		System.out.println("Need the Mouse Options to be activated");
 	}
 
-    // public void getNodeInformation(Node source){
-    //     System.out.println(source);
-    //     String currentRound = currentLabel.getText().substring(currentLabel.getText().length()-1);
-    //     System.out.println(currentRound);
-    //     String currentSignature = String.valueOf(source.getAttribute("signature"+currentRound));
-    //     float currentColor = (float)source.getAttribute("ui.color");
-    //     System.out.println("Current node has "+ String.valueOf(source.getDegree()) +"neighbours");
-    //     System.out.println(source + " current color is "+ currentColor);
-    //     System.out.println(source + " current signature is "+ currentSignature);
-    // }
-
     public String getNodeInformation(Node source) {
         StringBuilder result = new StringBuilder();
-        
         result.append("Clicked node '").append(source.toString());
-    
-        String currentRound = currentLabel.getText().substring(currentLabel.getText().length() - 1);
-        //result.append(currentRound).append("\n");
-    
-        String currentSignature = String.valueOf(source.getAttribute("signature" + currentRound));
-        currentSignature = currentSignature.length() > 10 ? currentSignature.substring(0, 10) : currentSignature;
-        float currentColor = (float) source.getAttribute("ui.color");
-    
         result.append("' has ").append(String.valueOf(source.getDegree())).append(" neighbours. ");
-        result.append(" Color code = ").append(currentColor).append(". ");
-        result.append(" Current signature = ").append(currentSignature).append("\n");
-    
+        if (source.hasAttribute("ui.color")){
+            String currentRound = currentLabel.getText().substring(currentLabel.getText().length() - 1);
+            String currentSignature = String.valueOf(source.getAttribute("signature" + currentRound));
+            float currentColor = (float) source.getAttribute("ui.color");
+            currentSignature = currentSignature.length() > 10 ? currentSignature.substring(0, 10) : currentSignature;
+            result.append(" Color code = ").append(currentColor).append(". ");
+            result.append(" Current signature = ").append(currentSignature).append(". ");
+        }
+        result.append("Current class = ").append(String.valueOf(colourMode));
         return result.toString();
     }
 
