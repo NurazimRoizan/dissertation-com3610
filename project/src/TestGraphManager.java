@@ -6,43 +6,43 @@ import org.graphstream.graph.implementations.SingleGraph;
 public class TestGraphManager{
     protected static String styleSheet =
         "node {" +
-                // "     shape: box;" +
-                "   stroke-mode: plain;" +
-                //"   text-color: white;" +
-                "   size: 10px, 15px;" +
-                "   stroke-color: yellow;" +
-                "   size: 20px; fill-color: rgb(100,255,100), rgba(255, 255, 255, 0); fill-mode: gradient-radial;" +
-                // "   shadow-mode: gradient-radial; shadow-width: 5px; shadow-color: #EEF, #000; shadow-offset: 2px;" +
-                "}" +
-                "node.marked {" +
-                "   fill-color: red;" +
-                "}" +
-                "node.colour {" +
-                "   fill-mode: dyn-plain;" +
-                // "   fill-color: red, darkgreen, white, blue, magenta, #444;" +
-                "   fill-color: red, rgb(255, 200, 100), yellow, rgb(50, 200, 0), green, blue, darkblue, rgb(200, 100, 200), rgb(180, 0, 180), rgb(100, 200, 200);" +
-                "}" +
-                "node.colour0 {" +
-                "   fill-color: gray;" +
-                "}" +
-                "node.spoiler {" +
-                "   stroke-mode: plain;" +
-                "   stroke-color: blue;" +
-                "   stroke-width: 2px;" +
-                "}" +
-                "node.duplicator {" +
-                "   stroke-mode: plain;" +
-                "   stroke-color: red;" +
-                "   stroke-width: 2px;" +
-                "}" +
-                "edge {" +
-                "   fill-color: brown;" +
-                // "shape: cubic-curve;" +
-                "}" +
-                "graph {" +
-                "   fill-color: #001329, #1C3353, red;" +
-                "   fill-mode: gradient-vertical;" +
-                "}";
+            // "     shape: box;" +
+            "   stroke-mode: plain;" +
+            //"   text-color: white;" +
+            "   size: 10px, 15px;" +
+            "   stroke-color: yellow;" +
+            "   size: 20px; fill-color: rgb(100,255,100), rgba(255, 255, 255, 0); fill-mode: gradient-radial;" +
+            // "   shadow-mode: gradient-radial; shadow-width: 5px; shadow-color: #EEF, #000; shadow-offset: 2px;" +
+            "}" +
+        "node.marked {" +
+            "   fill-color: red;" +
+            "}" +
+        "node.colour {" +
+            "   fill-mode: dyn-plain;" +
+            // "   fill-color: red, darkgreen, white, blue, magenta, #444;" +
+            "   fill-color: red, rgb(255, 200, 100), yellow, rgb(50, 200, 0), green, blue, darkblue, rgb(200, 100, 200), rgb(180, 0, 180), rgb(100, 200, 200);" +
+            "}" +
+        "node.colour0 {" +
+            "   fill-color: gray;" +
+            "}" +
+        "node.spoiler {" +
+            "   stroke-mode: plain;" +
+            "   stroke-color: blue;" +
+            "   stroke-width: 2px;" +
+            "}" +
+        "node.duplicator {" +
+            "   stroke-mode: plain;" +
+            "   stroke-color: red;" +
+            "   stroke-width: 2px;" +
+            "}" +
+        "edge {" +
+            "   fill-color: brown;" +
+            // "shape: cubic-curve;" +
+            "}" +
+        "graph {" +
+            "   fill-color: #001329, #1C3353, red;" +
+            "   fill-mode: gradient-vertical;" +
+            "}";
     
     public static Graph createGraph(String name, Generator gen) {
         //Generator gen = new DorogovtsevMendesGenerator();

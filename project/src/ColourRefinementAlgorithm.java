@@ -1,7 +1,9 @@
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.swing.JLabel;
@@ -64,10 +66,16 @@ public class ColourRefinementAlgorithm {
             
             if (degree >= 0){
                 if (colourTable.containsKey(String.valueOf(degree))){
-                    next.setAttribute("ui.class", "colour");
+                    if (next.hasAttribute("mark")){next.setAttribute("ui.class", "colour", next.getAttribute("mark"));
+                    }else {
+                        next.setAttribute("ui.class", "colour");
+                    }
                 }else {
                     colourTable.put(String.valueOf(degree), colourIndex);
-                    next.setAttribute("ui.class", "colour");
+                    if (next.hasAttribute("mark")){next.setAttribute("ui.class", "colour", next.getAttribute("mark"));
+                    }else {
+                        next.setAttribute("ui.class", "colour");
+                    }
                     colourIndex += 1;
                     colorChanges = true;
                     
@@ -154,13 +162,19 @@ public class ColourRefinementAlgorithm {
         String currentSignature = String.valueOf(source.getAttribute("signature"+(round-1)));
         String currentDegree = currentSignature.substring(0,1);
         StringBuilder neighbourSignature = new StringBuilder();
+        if (source.getAttribute("mark")=="spoiler"){
+            neighbourSignature.append("s");
+        }else if (source.getAttribute("mark")=="duplicator"){
+            neighbourSignature.append("d");
+        }
         neighbourNodes.forEach(neighbourNode -> {
             neighbourSignature.append(String.valueOf(neighbourNode.getAttribute("signature"+(round-1))));
             //System.out.println("Neighbor color signature: " + neighbourSignature);
             //System.out.println("Current Signature: " + String.valueOf(currentDegree) + neighbourSignature);
         });
-        String sortedNeighbourSignature = createSortedSignature(neighbourSignature.toString());
+        String sortedNeighbourSignature = createReverseSortedSignature(neighbourSignature.toString());
         neighbourSignature.setLength(0);
+        
         source.setAttribute("signature"+(round), currentDegree + sortedNeighbourSignature);
         //System.out.println("Done set for node= "+ source);
     }
@@ -169,6 +183,14 @@ public class ColourRefinementAlgorithm {
         char[] chars = s.toCharArray();
         Arrays.sort(chars);
         return new String(chars);
+    }
+
+    public static String createReverseSortedSignature(String s) {
+        return s.chars()
+                .mapToObj(c -> (char) c)
+                .sorted(Comparator.reverseOrder())
+                .map(String::valueOf)
+                .collect(Collectors.joining());
     }
 
     int currentCentroid = 0;

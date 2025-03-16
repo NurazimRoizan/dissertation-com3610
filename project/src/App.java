@@ -296,15 +296,23 @@ public class App implements ViewerListener {
         if (!"marked".equals(colourMode)) { 
             if (currentClass.equals("colour") && !currentClass.equals(colourMode)) {
                 clickedNode.setAttribute("ui.class", colourMode, "colour");
+                clickedNode.setAttribute("mark", colourMode);
             } else if (currentClass.equals("unmarked")) {
                 clickedNode.setAttribute("ui.class", colourMode);
+                clickedNode.setAttribute("mark", colourMode);
             } else if (currentClass.equals(colourMode)) {
                 clickedNode.setAttribute("ui.class", "unmarked");
+                clickedNode.removeAttribute("mark");
+            } else if (currentClass.equals(colourMode)) {
+                clickedNode.setAttribute("ui.class", "unmarked");
+                clickedNode.removeAttribute("mark");
             } else {
                 clickedNode.setAttribute("ui.class", clickedNode.hasAttribute("ui.color") ? "colour" : "unmarked");
+                clickedNode.removeAttribute("mark");
             }
         }else {
             if (clickedNode.hasAttribute("ui.color")) {
+                System.out.println(currentClass);
                 clickedNode.setAttribute("ui.class", currentClass.equals("colour") ? "unmarked" : "colour");
             } else {
                 clickedNode.setAttribute("ui.class", currentClass.equals("marked") ? "unmarked" : "marked");
