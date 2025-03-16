@@ -6,6 +6,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import java.awt.FlowLayout;
 
 import javax.swing.BorderFactory;
@@ -22,6 +24,7 @@ import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.ui.swing_viewer.ViewPanel;
@@ -38,7 +41,10 @@ public class App implements ViewerListener {
     protected ColourRefinementAlgorithm cRefineGraph;
     protected boolean cRefinementGoing = false;
     protected JLabel currentLabel, graphLabel1, graphLabel2, nodeInfoLabel;
-    protected int sleepTime = 100;
+    protected int sleepTime = 0;
+    //protected Generator gen = new BarabasiAlbertGenerator(1);
+    protected ViewerPipe fromViewer; 
+
 
     public static void main(String args[]) {
         System.setProperty("org.graphstream.ui", "swing");
@@ -54,7 +60,6 @@ public class App implements ViewerListener {
 
         graph.setAutoCreate(true);
         graph.setStrict(false);
-
         SwingViewer viewer = new SwingViewer(graph, SwingViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
         SwingViewer viewer2 = new SwingViewer(graph2, SwingViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
         viewer.enableAutoLayout();
@@ -131,10 +136,12 @@ public class App implements ViewerListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Moving back in time . . .");
-                int currentRound = Integer.parseInt(currentLabel.getText().substring(currentLabel.getText().length()-1))-1;
-                cRefineGraph.setIteration(currentGraph, currentRound);
-                System.out.println("======================== ");
-                currentLabel.setText("Round " + currentRound);
+                int previousRound = Integer.parseInt(currentLabel.getText().substring(currentLabel.getText().length()-1))-1;
+                if (previousRound > 0){
+                    cRefineGraph.setIteration(currentGraph, previousRound);
+                    System.out.println("======================== ");
+                    currentLabel.setText("Round " + previousRound);
+                }
             }
         });
 
@@ -144,14 +151,44 @@ public class App implements ViewerListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Going forward in time . . .");
-                int currentRound = Integer.parseInt(currentLabel.getText().substring(currentLabel.getText().length()-1))+1;
-                cRefineGraph.setIteration(currentGraph, currentRound);
-                System.out.println("======================== ");
-                currentLabel.setText("Round " + currentRound);
+                int nextRound = Integer.parseInt(currentLabel.getText().substring(currentLabel.getText().length()-1))+1;
+                if (cRefineGraph.getStableRound()>nextRound){
+                    cRefineGraph.setIteration(currentGraph, nextRound);
+                    System.out.println("======================== ");
+                    currentLabel.setText("Round " + nextRound);
+                }
             }
         });
 
-        SpinnerNumberModel model = new SpinnerNumberModel(50, 0, 100, 10);
+        JButton resetButton = new JButton("Reset Graph");
+        resetButton.setVisible(true);
+        resetButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Getting new graph");
+                currentGraph.clear();
+                Graph newGraph = TestGraphManager.createGraph("Graph A", new DorogovtsevMendesGenerator());
+
+                newGraph.attributeKeys().forEach((key) -> {
+                    currentGraph.setAttribute(key, new Object[]{newGraph.getAttribute(key)});
+                 });
+
+                Stream<Node> nodeStream = StreamSupport.stream(newGraph.nodes().spliterator(), false);
+                nodeStream.forEach(node -> {
+                    currentGraph.addNode(node.getId());
+                    node.attributeKeys().forEach(key -> currentGraph.getNode(node.getId()).setAttribute(key, node.getAttribute(key)));
+                });
+
+                // Convert Iterable to Stream for edges 
+                Stream<Edge> edgeStream = StreamSupport.stream(newGraph.edges().spliterator(), false);
+                edgeStream.forEach(edge -> {
+                    currentGraph.addEdge(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.isDirected());
+                    edge.attributeKeys().forEach(key -> currentGraph.getEdge(edge.getId()).setAttribute(key, edge.getAttribute(key)));
+                });
+                    }
+                });
+
+        SpinnerNumberModel model = new SpinnerNumberModel(0, 0, 100, 10);
         JSpinner speedSpinner = new JSpinner(model);
 
         speedSpinner.addChangeListener(new ChangeListener() {
@@ -169,8 +206,9 @@ public class App implements ViewerListener {
         buttonPanel.add(myButton5);
         buttonPanel.add(myButton4);
         JLabel speedLabel = new JLabel("Animation Delay: "); // Create the label
-        buttonPanel.add(speedLabel);
-        buttonPanel.add(speedSpinner);
+        //buttonPanel.add(speedLabel);
+        //buttonPanel.add(speedSpinner);
+        buttonPanel.add(resetButton);
 
         bottomPanel.add(nodeInfoLabel);
         bottomPanel.add(buttonPanel);
@@ -223,7 +261,8 @@ public class App implements ViewerListener {
             }
         });
 
-        ViewerPipe fromViewer = viewer.newViewerPipe();
+        fromViewer = viewer.newViewerPipe();
+        //ViewerPipe fromViewer = viewer.newViewerPipe();
         ViewerPipe fromViewer2 = viewer2.newViewerPipe();
         fromViewer.addViewerListener(this);
         fromViewer2.addViewerListener(this);

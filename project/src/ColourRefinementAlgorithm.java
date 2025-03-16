@@ -18,7 +18,7 @@ public class ColourRefinementAlgorithm {
     private boolean startIteration; // Or manage this externally
     private boolean cRefinementGoing;
     private JLabel roundTitle;
-    private int round;
+    private int round, stableRound;
     private int previousSize;
     private int sleep;
 
@@ -45,7 +45,7 @@ public class ColourRefinementAlgorithm {
             System.out.println("Algorithm now stable");
             cRefinementGoing = false;
             System.out.println("End of Colour Refinement");
-            roundTitle.setText("Round " + (round-1));
+            this.stableRound = round;
         }
     }
 
@@ -143,9 +143,9 @@ public class ColourRefinementAlgorithm {
         if (previousSize != colourTable.size()){
             colorChanges = true;
             previousSize = colourTable.size();
+            roundTitle.setText("Round " + round);
         }
 
-        roundTitle.setText("Round " + round);
         System.out.println("End of Round "+ round);
     }
 
@@ -229,6 +229,9 @@ public class ColourRefinementAlgorithm {
     }
     public boolean getCRefinementGoing(){
         return this.cRefinementGoing;
+    }
+    public int getStableRound(){
+        return stableRound;
     }
 
     protected void sleep(int milisec) {
