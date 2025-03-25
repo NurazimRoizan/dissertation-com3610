@@ -12,9 +12,10 @@ import java.awt.FlowLayout;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
@@ -47,6 +48,9 @@ public class App implements ViewerListener {
     protected ViewerPipe fromViewer; 
     protected boolean pebbleStarted = false;
     protected Node firstPebble;
+    protected JToggleButton spoilerMark = new JToggleButton("Spoiler Move");
+    protected JToggleButton duplicatorMark = new JToggleButton("Duplicator Move");
+    JButton startPebbleButton;
 
 
     public static void main(String args[]) {
@@ -92,8 +96,10 @@ public class App implements ViewerListener {
         centerPanel.add((Component) view);
         centerPanel.add((Component) view2);
 
-        JToggleButton spoilerMark = new JToggleButton("Spoiler Move");
-        JToggleButton duplicatorMark = new JToggleButton("Duplicator Move");
+        spoilerMark.setVisible(false);
+        spoilerMark.setSelected(true);
+        duplicatorMark.setSelected(true);
+        duplicatorMark.setVisible(false);
         
         Border emptyBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
         spoilerMark.addActionListener(new ActionListener() {
@@ -123,6 +129,18 @@ public class App implements ViewerListener {
                     colourMode = "marked";
                 }
                 
+            }
+        });
+
+        startPebbleButton = new JButton("Start Pebble Game");
+        startPebbleButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startPebbleButton.setVisible(false);
+                spoilerMark.setVisible(true);
+                nodeInfoLabel.setText("Spoiler Turn");
+                colourMode = "spoiler";
+                pebbleStarted = true;
             }
         });
 
@@ -170,41 +188,16 @@ public class App implements ViewerListener {
         resetOption.setVisible(true);
         resetOption.addActionListener(new ActionListener() {
             @Override
+            // public void actionPerformed(ActionEvent e) {
+            //     System.out.println("Popping a window");
+            //     resetEverything();
+            //     Object[] options = {"Simple", "Barabasi", "Dorogovt", "Random"};
+            //     int choice = JOptionPane.showOptionDialog(null, "Choose graph type", "Generators", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+            //     newGraphGenerator(choice, currentGraph);
+            // }
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Popping a window");
-                resetEverything();
-                Object[] options = {"Simple", "Barabasi", "Dorogovt", "Random"};
-                int choice = JOptionPane.showOptionDialog(null, "Choose graph type", "Generators", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
-                newGraphGenerator(choice);
-            }
-        });
-
-        JButton resetButton = new JButton("Reset Graph");
-        resetButton.setVisible(true);
-        resetButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("Getting new graph");
-                currentGraph.clear();
-                //Graph newGraph = TestGraphManager.createGraph("Graph A", new DorogovtsevMendesGenerator());
-                Graph newGraph = TestGraphManager.createGraph("Graph A", new BarabasiAlbertGenerator(1));
-
-                newGraph.attributeKeys().forEach((key) -> {
-                    currentGraph.setAttribute(key, new Object[]{newGraph.getAttribute(key)});
-                 });
-
-                Stream<Node> nodeStream = StreamSupport.stream(newGraph.nodes().spliterator(), false);
-                nodeStream.forEach(node -> {
-                    currentGraph.addNode(node.getId());
-                    node.attributeKeys().forEach(key -> currentGraph.getNode(node.getId()).setAttribute(key, node.getAttribute(key)));
-                });
-
-                // Convert Iterable to Stream for edges 
-                Stream<Edge> edgeStream = StreamSupport.stream(newGraph.edges().spliterator(), false);
-                edgeStream.forEach(edge -> {
-                    currentGraph.addEdge(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.isDirected());
-                    edge.attributeKeys().forEach(key -> currentGraph.getEdge(edge.getId()).setAttribute(key, edge.getAttribute(key)));
-                });
+                System.out.println("Showing custom reset dialog");
+                showResetDialog(frame);
             }
         });
 
@@ -220,16 +213,16 @@ public class App implements ViewerListener {
             }
         });
 
+        buttonPanel.add(startPebbleButton);
         buttonPanel.add(spoilerMark);
         buttonPanel.add(duplicatorMark);
         buttonPanel.add(myButton3);
         buttonPanel.add(myButton5);
         buttonPanel.add(myButton4);
         buttonPanel.add(resetOption);
-        JLabel speedLabel = new JLabel("Animation Delay: "); // Create the label
+        //JLabel speedLabel = new JLabel("Animation Delay: "); // Create the label
         //buttonPanel.add(speedLabel);
         //buttonPanel.add(speedSpinner);
-        buttonPanel.add(resetButton);
 
         bottomPanel.add(nodeInfoLabel);
         bottomPanel.add(buttonPanel);
@@ -326,9 +319,11 @@ public class App implements ViewerListener {
                 if (!currentGraph.hasAttribute("pebbleStarted")){
                     currentGraph.setAttribute("pebbleStarted", clickedNode.getId());
                 }
+                swapColourMode();
             } else if (currentClass.equals("unmarked")) { // Pebble marking (before color refienment)
                 clickedNode.setAttribute("ui.class", colourMode);
                 clickedNode.setAttribute("mark", colourMode);
+                swapColourMode();
             } else if (currentClass.equals(colourMode)) {   //Remove Pebble Marking
                 clickedNode.setAttribute("ui.class", "unmarked");
                 clickedNode.removeAttribute("mark");
@@ -344,7 +339,10 @@ public class App implements ViewerListener {
                 clickedNode.setAttribute("ui.class", currentClass.equals("marked") ? "unmarked" : "marked");
             }
         }
-        nodeInfoLabel.setText(getNodeInformation(clickedNode));
+        //TODO
+        if (!pebbleStarted) {
+            nodeInfoLabel.setText(getNodeInformation(clickedNode)); 
+        }
 	}
 
 	public void buttonReleased(String id) {
@@ -379,7 +377,7 @@ public class App implements ViewerListener {
         try { Thread.sleep(100); } catch (Exception e) {}
     }
 
-    public void newGraphGenerator(int choosenType){
+    public void newGraphGenerator(int choosenType, Graph choosenGraph){
         Graph newGraph;
         switch (choosenType) {
             case 1:
@@ -398,29 +396,106 @@ public class App implements ViewerListener {
                 newGraph = TestGraphManager.createGraph("Graph", new WattsStrogatzGenerator(10,2,0.5));
         }
         System.out.println("Getting new graph");
-        currentGraph.clear();
+        choosenGraph.clear();
         //Graph newGraph = TestGraphManager.createGraph("Graph A", new DorogovtsevMendesGenerator());
 
         newGraph.attributeKeys().forEach((key) -> {
-            currentGraph.setAttribute(key, new Object[]{newGraph.getAttribute(key)});
+            choosenGraph.setAttribute(key, new Object[]{newGraph.getAttribute(key)});
             });
 
         Stream<Node> nodeStream = StreamSupport.stream(newGraph.nodes().spliterator(), false);
         nodeStream.forEach(node -> {
-            currentGraph.addNode(node.getId());
-            node.attributeKeys().forEach(key -> currentGraph.getNode(node.getId()).setAttribute(key, node.getAttribute(key)));
+            choosenGraph.addNode(node.getId());
+            node.attributeKeys().forEach(key -> choosenGraph.getNode(node.getId()).setAttribute(key, node.getAttribute(key)));
         });
 
         // Convert Iterable to Stream for edges 
         Stream<Edge> edgeStream = StreamSupport.stream(newGraph.edges().spliterator(), false);
         edgeStream.forEach(edge -> {
-            currentGraph.addEdge(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.isDirected());
-            edge.attributeKeys().forEach(key -> currentGraph.getEdge(edge.getId()).setAttribute(key, edge.getAttribute(key)));
+            choosenGraph.addEdge(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.isDirected());
+            edge.attributeKeys().forEach(key -> choosenGraph.getEdge(edge.getId()).setAttribute(key, edge.getAttribute(key)));
         });
     }
 
     public void resetEverything(){
         firstPebble = null;
         pebbleStarted= false;
+        spoilerMark.setVisible(false);
+        duplicatorMark.setVisible(false);
+        startPebbleButton.setVisible(true);
+    }
+
+    public void swapColourMode(){
+        spoilerMark.setVisible(colourMode.equals("duplicator") ? true : false);
+        duplicatorMark.setVisible(colourMode.equals("spoiler") ? true : false);
+        colourMode = (colourMode.equals("duplicator") ? "spoiler" : "duplicator") ;
+        nodeInfoLabel.setText(colourMode.substring(0, 1).toUpperCase() + colourMode.substring(1) + " turn");
+    }
+
+    private void showResetDialog(JFrame parentFrame) {
+        JDialog resetDialog = new JDialog(parentFrame, "Reset Options", true); // true for modal
+        resetDialog.setLayout(new BorderLayout());
+
+        JLabel graphTypeLabel = new JLabel("Choose graph type:", SwingConstants.CENTER);
+        String[] graphOptions = {"Simple", "Barabasi", "Dorogovt", "Random"};
+
+        JCheckBox clearBothGraphCheckBox = new JCheckBox("CLEAR BOTH GRAPH");
+        JPanel checkboxPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        clearBothGraphCheckBox.setHorizontalTextPosition(SwingConstants.LEFT);
+        checkboxPanel.add(clearBothGraphCheckBox);
+        clearBothGraphCheckBox.setSelected(false); // Set initial state if needed
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        ActionListener graphButtonListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String selectedType = e.getActionCommand();
+                boolean clearData = clearBothGraphCheckBox.isSelected();
+
+                System.out.println("Selected type: " + selectedType);
+                System.out.println("Clear data: " + clearData);
+
+                int choice = -1;
+                for (int i = 0; i < graphOptions.length; i++) {
+                    if (graphOptions[i].equals(selectedType)) {
+                        choice = i;
+                        break;
+                    }
+                }
+                if (clearData) {
+                newGraphGenerator(choice, graph);
+                newGraphGenerator(choice, graph2);
+                }else{
+                    newGraphGenerator(choice, currentGraph);
+                }
+                resetEverything();
+                resetDialog.dispose(); // Close the dialog
+            }
+        };
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                resetDialog.dispose(); // Close the dialog
+            }
+        });
+
+        for (String option : graphOptions) {
+            JButton optionButton = new JButton(option);
+            optionButton.setActionCommand(option); // Set the action command to the graph type
+            optionButton.addActionListener(graphButtonListener);
+            buttonPanel.add(optionButton);
+        }
+        buttonPanel.add(cancelButton);
+        
+
+        resetDialog.add(checkboxPanel, BorderLayout.NORTH);
+        resetDialog.add(graphTypeLabel, BorderLayout.CENTER);
+        resetDialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        resetDialog.pack(); // Adjust dialog size to fit components
+        resetDialog.setLocationRelativeTo(parentFrame); // Center relative to the parent
+        resetDialog.setVisible(true);
     }
 }
