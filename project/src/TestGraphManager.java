@@ -43,25 +43,27 @@ public class TestGraphManager{
             "   fill-color: #001329, #1C3353, red;" +
             "   fill-mode: gradient-vertical;" +
             "}";
-    
+    public static Graph createGraph(String name, Generator gen , int maxNode) {
+                //Generator gen = new DorogovtsevMendesGenerator();
+                //Generator gen = new BananaTreeGenerator();
+                //Generator gen = new BarabasiAlbertGenerator(1);
+                Graph graph = new SingleGraph(name);
+                gen.addSink(graph);
+                gen.begin();
+                for (int i = 0; i < maxNode; i++) {
+                    gen.nextEvents();
+                }
+                gen.end();
+        
+                graph.setAttribute("ui.stylesheet", styleSheet); 
+                for (Node node : graph) {
+                    node.setAttribute("ui.label", node.getId());
+                    node.setAttribute("ui.class", "unmarked");
+                }
+                return graph;
+    }
     public static Graph createGraph(String name, Generator gen) {
-        //Generator gen = new DorogovtsevMendesGenerator();
-        //Generator gen = new BananaTreeGenerator();
-        //Generator gen = new BarabasiAlbertGenerator(1);
-        Graph graph = new SingleGraph(name);
-        gen.addSink(graph);
-        gen.begin();
-        for (int i = 0; i < 20; i++) {
-            gen.nextEvents();
-        }
-        gen.end();
-
-        graph.setAttribute("ui.stylesheet", styleSheet); 
-        for (Node node : graph) {
-            node.setAttribute("ui.label", node.getId());
-            node.setAttribute("ui.class", "unmarked");
-        }
-        return graph;
+        return createGraph(name, gen, 10);
     }
 
 }

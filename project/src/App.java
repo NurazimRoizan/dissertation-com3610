@@ -14,6 +14,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
@@ -53,7 +54,8 @@ public class App implements ViewerListener {
 
     public App() {
         Generator gen = new BarabasiAlbertGenerator(1);
-        Generator gen2 = new DorogovtsevMendesGenerator();
+        Generator gen2 = new BarabasiAlbertGenerator(1);
+        //Generator gen2 = new DorogovtsevMendesGenerator();
         graph = TestGraphManager.createGraph("Graph A", gen);
         graph2 = TestGraphManager.createGraph("Graph B", gen2);
         currentGraph = graph;
@@ -98,6 +100,8 @@ public class App implements ViewerListener {
                 if (spoilerMark.isSelected()){
                     duplicatorMark.setSelected(false);
                     System.out.println("Spoiler now can mark the node");
+                    nodeInfoLabel.setText("Spoiler Turn");
+
                     colourMode = "spoiler";
                 }else{
                     colourMode = "marked";
@@ -111,6 +115,7 @@ public class App implements ViewerListener {
                 if (duplicatorMark.isSelected()){
                     spoilerMark.setSelected(false);
                     System.out.println("Duplicator now can mark the node");
+                    nodeInfoLabel.setText("Duplicator Turn");
                     colourMode = "duplicator";
                 }else{
                     colourMode = "marked";
@@ -159,6 +164,18 @@ public class App implements ViewerListener {
                 }
             }
         });
+        JButton resetOption = new JButton("Reset graph");
+        resetOption.setVisible(true);
+        resetOption.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Popping a window");
+
+                Object[] options = {"Simple", "Barabasi", "Dorogovt", "Random"};
+                int choice = JOptionPane.showOptionDialog(null, "Choose graph type", "Generators", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+                newGraphGenerator(choice);
+            }
+        });
 
         JButton resetButton = new JButton("Reset Graph");
         resetButton.setVisible(true);
@@ -167,7 +184,8 @@ public class App implements ViewerListener {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Getting new graph");
                 currentGraph.clear();
-                Graph newGraph = TestGraphManager.createGraph("Graph A", new DorogovtsevMendesGenerator());
+                //Graph newGraph = TestGraphManager.createGraph("Graph A", new DorogovtsevMendesGenerator());
+                Graph newGraph = TestGraphManager.createGraph("Graph A", new BarabasiAlbertGenerator(1));
 
                 newGraph.attributeKeys().forEach((key) -> {
                     currentGraph.setAttribute(key, new Object[]{newGraph.getAttribute(key)});
@@ -185,8 +203,8 @@ public class App implements ViewerListener {
                     currentGraph.addEdge(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.isDirected());
                     edge.attributeKeys().forEach(key -> currentGraph.getEdge(edge.getId()).setAttribute(key, edge.getAttribute(key)));
                 });
-                    }
-                });
+            }
+        });
 
         SpinnerNumberModel model = new SpinnerNumberModel(0, 0, 100, 10);
         JSpinner speedSpinner = new JSpinner(model);
@@ -205,6 +223,7 @@ public class App implements ViewerListener {
         buttonPanel.add(myButton3);
         buttonPanel.add(myButton5);
         buttonPanel.add(myButton4);
+        buttonPanel.add(resetOption);
         JLabel speedLabel = new JLabel("Animation Delay: "); // Create the label
         //buttonPanel.add(speedLabel);
         //buttonPanel.add(speedSpinner);
@@ -351,5 +370,44 @@ public class App implements ViewerListener {
 
     protected void sleep() {
         try { Thread.sleep(100); } catch (Exception e) {}
+    }
+    public void newGraphGenerator(int choosenType){
+        Graph newGraph;
+        switch (choosenType) {
+            case 1:
+                newGraph = TestGraphManager.createGraph("Graph", new BarabasiAlbertGenerator(1));
+                break;
+            case 2:
+                newGraph = TestGraphManager.createGraph("Graph", new DorogovtsevMendesGenerator());
+                break;
+            case 0: //Simple
+                newGraph = TestGraphManager.createGraph("Graph",new WattsStrogatzGenerator(10,2,0.5));
+                break;
+            case 3:
+                newGraph = TestGraphManager.createGraph("Graph", new WattsStrogatzGenerator(10,2,0.5));
+                break;
+            default:
+                newGraph = TestGraphManager.createGraph("Graph", new WattsStrogatzGenerator(10,2,0.5));
+        }
+        System.out.println("Getting new graph");
+        currentGraph.clear();
+        //Graph newGraph = TestGraphManager.createGraph("Graph A", new DorogovtsevMendesGenerator());
+
+        newGraph.attributeKeys().forEach((key) -> {
+            currentGraph.setAttribute(key, new Object[]{newGraph.getAttribute(key)});
+            });
+
+        Stream<Node> nodeStream = StreamSupport.stream(newGraph.nodes().spliterator(), false);
+        nodeStream.forEach(node -> {
+            currentGraph.addNode(node.getId());
+            node.attributeKeys().forEach(key -> currentGraph.getNode(node.getId()).setAttribute(key, node.getAttribute(key)));
+        });
+
+        // Convert Iterable to Stream for edges 
+        Stream<Edge> edgeStream = StreamSupport.stream(newGraph.edges().spliterator(), false);
+        edgeStream.forEach(edge -> {
+            currentGraph.addEdge(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.isDirected());
+            edge.attributeKeys().forEach(key -> currentGraph.getEdge(edge.getId()).setAttribute(key, edge.getAttribute(key)));
+        });
     }
 }
