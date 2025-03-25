@@ -36,8 +36,7 @@ public class ColourRefinementAlgorithm {
         this.sleep = sleep;
     }
 
-    public void cRefinement(Graph graph){
-        Node startNode = computeCentroid(graph);
+    public void cRefinement(Graph graph, Node startNode){
         if (startIteration) {startup(startNode);}
         if (colorChanges){
             System.out.println("There is color changes. Starting new round . . .");
@@ -49,6 +48,11 @@ public class ColourRefinementAlgorithm {
             System.out.println("End of Colour Refinement");
             this.stableRound = round;
         }
+    }
+
+    public void cRefinement(Graph graph){
+        Node startNode = computeCentroid(graph);
+        cRefinement(graph, startNode);
     }
 
     public void startup(Node source) {

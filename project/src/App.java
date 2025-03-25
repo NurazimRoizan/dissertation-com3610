@@ -45,6 +45,8 @@ public class App implements ViewerListener {
     protected int sleepTime = 0;
     //protected Generator gen = new BarabasiAlbertGenerator(1);
     protected ViewerPipe fromViewer; 
+    protected boolean pebbleStarted = false;
+    protected Node firstPebble;
 
 
     public static void main(String args[]) {
@@ -170,7 +172,7 @@ public class App implements ViewerListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Popping a window");
-
+                resetEverything();
                 Object[] options = {"Simple", "Barabasi", "Dorogovt", "Random"};
                 int choice = JOptionPane.showOptionDialog(null, "Choose graph type", "Generators", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
                 newGraphGenerator(choice);
@@ -293,7 +295,12 @@ public class App implements ViewerListener {
             fromViewer2.pump();
             if (cRefineGraph != null){
                 if (cRefineGraph.getCRefinementGoing()){
-                    cRefineGraph.cRefinement(currentGraph);
+                    if (currentGraph.hasAttribute("pebbleStarted")){
+                        System.out.println("===============================================================");
+                        firstPebble = currentGraph.getNode((String)currentGraph.getAttribute("pebbleStarted"));
+                        System.out.println("starting refinement on node: " + firstPebble.getId());
+                        cRefineGraph.cRefinement(currentGraph, firstPebble);
+                    }else{cRefineGraph.cRefinement(currentGraph);}  
                 }
             }
         }
@@ -312,25 +319,25 @@ public class App implements ViewerListener {
         Node clickedNode = currentGraph.getNode(id);
         String currentClass = String.valueOf(clickedNode.getAttribute("ui.class"));
 
-        if (!"marked".equals(colourMode)) { 
-            if (currentClass.equals("colour") && !currentClass.equals(colourMode)) {
+        if (!"marked".equals(colourMode)) { // Marking Mode
+            if (currentClass.equals("colour") && !currentClass.equals(colourMode)) { // Pebble Marking (after color refienment)
                 clickedNode.setAttribute("ui.class", colourMode, "colour");
                 clickedNode.setAttribute("mark", colourMode);
-            } else if (currentClass.equals("unmarked")) {
+                if (!currentGraph.hasAttribute("pebbleStarted")){
+                    currentGraph.setAttribute("pebbleStarted", clickedNode.getId());
+                }
+            } else if (currentClass.equals("unmarked")) { // Pebble marking (before color refienment)
                 clickedNode.setAttribute("ui.class", colourMode);
                 clickedNode.setAttribute("mark", colourMode);
-            } else if (currentClass.equals(colourMode)) {
+            } else if (currentClass.equals(colourMode)) {   //Remove Pebble Marking
                 clickedNode.setAttribute("ui.class", "unmarked");
                 clickedNode.removeAttribute("mark");
-            } else if (currentClass.equals(colourMode)) {
-                clickedNode.setAttribute("ui.class", "unmarked");
-                clickedNode.removeAttribute("mark");
-            } else {
+            } else { // add colour or remove colour when clicked appropriately
                 clickedNode.setAttribute("ui.class", clickedNode.hasAttribute("ui.color") ? "colour" : "unmarked");
                 clickedNode.removeAttribute("mark");
             }
-        }else {
-            if (clickedNode.hasAttribute("ui.color")) {
+        }else { // Default mode (No marking)
+            if (clickedNode.hasAttribute("ui.color")) { //Remove or add colour 
                 System.out.println(currentClass);
                 clickedNode.setAttribute("ui.class", currentClass.equals("colour") ? "unmarked" : "colour");
             } else {
@@ -371,6 +378,7 @@ public class App implements ViewerListener {
     protected void sleep() {
         try { Thread.sleep(100); } catch (Exception e) {}
     }
+
     public void newGraphGenerator(int choosenType){
         Graph newGraph;
         switch (choosenType) {
@@ -409,5 +417,10 @@ public class App implements ViewerListener {
             currentGraph.addEdge(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.isDirected());
             edge.attributeKeys().forEach(key -> currentGraph.getEdge(edge.getId()).setAttribute(key, edge.getAttribute(key)));
         });
+    }
+
+    public void resetEverything(){
+        firstPebble = null;
+        pebbleStarted= false;
     }
 }
