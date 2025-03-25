@@ -44,6 +44,7 @@ public class App implements ViewerListener {
     protected boolean cRefinementGoing = false;
     protected JLabel currentLabel, graphLabel1, graphLabel2, nodeInfoLabel;
     protected int sleepTime = 0;
+    protected int maxNode = 10;
     //protected Generator gen = new BarabasiAlbertGenerator(1);
     protected ViewerPipe fromViewer; 
     protected boolean pebbleStarted = false;
@@ -106,12 +107,13 @@ public class App implements ViewerListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (spoilerMark.isSelected()){
-                    duplicatorMark.setSelected(false);
+                    spoilerMark.setText("Spoiler move");
                     System.out.println("Spoiler now can mark the node");
                     nodeInfoLabel.setText("Spoiler Turn");
 
                     colourMode = "spoiler";
                 }else{
+                    spoilerMark.setText("Resume Pebble Game");
                     colourMode = "marked";
                 }
             }
@@ -121,11 +123,13 @@ public class App implements ViewerListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (duplicatorMark.isSelected()){
-                    spoilerMark.setSelected(false);
+                    duplicatorMark.setText("Spoiler move");
+
                     System.out.println("Duplicator now can mark the node");
                     nodeInfoLabel.setText("Duplicator Turn");
                     colourMode = "duplicator";
                 }else{
+                    duplicatorMark.setText("Resume Pebble Game");
                     colourMode = "marked";
                 }
                 
@@ -188,13 +192,6 @@ public class App implements ViewerListener {
         resetOption.setVisible(true);
         resetOption.addActionListener(new ActionListener() {
             @Override
-            // public void actionPerformed(ActionEvent e) {
-            //     System.out.println("Popping a window");
-            //     resetEverything();
-            //     Object[] options = {"Simple", "Barabasi", "Dorogovt", "Random"};
-            //     int choice = JOptionPane.showOptionDialog(null, "Choose graph type", "Generators", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
-            //     newGraphGenerator(choice, currentGraph);
-            // }
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Showing custom reset dialog");
                 showResetDialog(frame);
@@ -381,19 +378,19 @@ public class App implements ViewerListener {
         Graph newGraph;
         switch (choosenType) {
             case 1:
-                newGraph = TestGraphManager.createGraph("Graph", new BarabasiAlbertGenerator(1));
+                newGraph = TestGraphManager.createGraph("Graph", new BarabasiAlbertGenerator(1), maxNode);
                 break;
             case 2:
-                newGraph = TestGraphManager.createGraph("Graph", new DorogovtsevMendesGenerator());
+                newGraph = TestGraphManager.createGraph("Graph", new DorogovtsevMendesGenerator(), maxNode);
                 break;
             case 0: //Simple
-                newGraph = TestGraphManager.createGraph("Graph",new WattsStrogatzGenerator(10,2,0.5));
+                newGraph = TestGraphManager.createGraph("Graph",new WattsStrogatzGenerator(maxNode,2,0.5), maxNode);
                 break;
             case 3:
-                newGraph = TestGraphManager.createGraph("Graph", new WattsStrogatzGenerator(10,2,0.5));
+                newGraph = TestGraphManager.createGraph("Graph", new WattsStrogatzGenerator(maxNode,2,0.5), maxNode);
                 break;
             default:
-                newGraph = TestGraphManager.createGraph("Graph", new WattsStrogatzGenerator(10,2,0.5));
+                newGraph = TestGraphManager.createGraph("Graph", new WattsStrogatzGenerator(10,2,0.5), maxNode);
         }
         System.out.println("Getting new graph");
         choosenGraph.clear();
@@ -419,6 +416,7 @@ public class App implements ViewerListener {
 
     public void resetEverything(){
         firstPebble = null;
+        colourMode= "marked";
         pebbleStarted= false;
         spoilerMark.setVisible(false);
         duplicatorMark.setVisible(false);
@@ -450,10 +448,10 @@ public class App implements ViewerListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String selectedType = e.getActionCommand();
-                boolean clearData = clearBothGraphCheckBox.isSelected();
+                boolean clearBoth = clearBothGraphCheckBox.isSelected();
 
                 System.out.println("Selected type: " + selectedType);
-                System.out.println("Clear data: " + clearData);
+                System.out.println("Clear data: " + clearBoth);
 
                 int choice = -1;
                 for (int i = 0; i < graphOptions.length; i++) {
@@ -462,7 +460,7 @@ public class App implements ViewerListener {
                         break;
                     }
                 }
-                if (clearData) {
+                if (clearBoth) {
                 newGraphGenerator(choice, graph);
                 newGraphGenerator(choice, graph2);
                 }else{
@@ -488,8 +486,21 @@ public class App implements ViewerListener {
             buttonPanel.add(optionButton);
         }
         buttonPanel.add(cancelButton);
-        
 
+        JLabel maxNodeLabel = new JLabel("Maximum Node per Graph:");
+        SpinnerNumberModel model = new SpinnerNumberModel(10, 1, 100, 10);
+        JSpinner maxNumberNodeSpinner = new JSpinner(model);
+        maxNumberNodeSpinner.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                int maxNumber = (int) maxNumberNodeSpinner.getValue();
+                System.out.println("Max Node set: " + maxNumber);
+                maxNode = maxNumber;
+            }
+        });
+
+        checkboxPanel.add(maxNodeLabel);
+        checkboxPanel.add(maxNumberNodeSpinner);
+        
         resetDialog.add(checkboxPanel, BorderLayout.NORTH);
         resetDialog.add(graphTypeLabel, BorderLayout.CENTER);
         resetDialog.add(buttonPanel, BorderLayout.SOUTH);
