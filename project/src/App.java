@@ -16,6 +16,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
@@ -37,7 +38,7 @@ import org.graphstream.algorithm.generator.*;
 
 public class App implements ViewerListener {
     protected boolean loop = true;
-    protected Graph graph, graph2, currentGraph;
+    protected Graph graph, graph2, currentGraph, previousPickedGraph;
     protected String colourMode = "marked";
     protected boolean exploreGraph = false; //old
     protected ColourRefinementAlgorithm cRefineGraph;
@@ -51,7 +52,8 @@ public class App implements ViewerListener {
     protected Node firstPebble;
     protected JToggleButton spoilerMark = new JToggleButton("Spoiler Move");
     protected JToggleButton duplicatorMark = new JToggleButton("Duplicator Move");
-    JButton startPebbleButton;
+    protected PebbleGameState pebbleGame;
+    protected JButton startPebbleButton;
 
 
     public static void main(String args[]) {
@@ -145,6 +147,7 @@ public class App implements ViewerListener {
                 nodeInfoLabel.setText("Spoiler Turn");
                 colourMode = "spoiler";
                 pebbleStarted = true;
+                pebbleGame = new PebbleGameState(graph, graph2);
             }
         });
 
@@ -217,9 +220,9 @@ public class App implements ViewerListener {
         buttonPanel.add(myButton5);
         buttonPanel.add(myButton4);
         buttonPanel.add(resetOption);
-        //JLabel speedLabel = new JLabel("Animation Delay: "); // Create the label
-        //buttonPanel.add(speedLabel);
-        //buttonPanel.add(speedSpinner);
+        JLabel speedLabel = new JLabel("Animation Delay: "); // Create the label
+        buttonPanel.add(speedLabel);
+        buttonPanel.add(speedSpinner);
 
         bottomPanel.add(nodeInfoLabel);
         bottomPanel.add(buttonPanel);
@@ -311,16 +314,39 @@ public class App implements ViewerListener {
 
         if (!"marked".equals(colourMode)) { // Marking Mode
             if (currentClass.equals("colour") && !currentClass.equals(colourMode)) { // Pebble Marking (after color refienment)
-                clickedNode.setAttribute("ui.class", colourMode, "colour");
-                clickedNode.setAttribute("mark", colourMode);
+                // clickedNode.setAttribute("ui.class", colourMode, "colour");
+                // clickedNode.setAttribute("mark", colourMode);
                 if (!currentGraph.hasAttribute("pebbleStarted")){
                     currentGraph.setAttribute("pebbleStarted", clickedNode.getId());
                 }
-                swapColourMode();
+                if (pebbleStarted) {
+                    if (pebbleGame.checkValidMove(currentGraph, colourMode)){
+                        clickedNode.setAttribute("ui.class", colourMode, "colour");
+                        clickedNode.setAttribute("mark", colourMode);
+                        pebbleGame.addPebble(clickedNode, currentGraph, colourMode);
+                        swapColourMode();
+                    }else{
+                        JOptionPane.showMessageDialog(null, "Spoiler already choose a node from this graph !", "Choose a different graph", JOptionPane.WARNING_MESSAGE);
+                        nodeInfoLabel.setText("! ! ! Duplicator should not choose node on the same graph as spoiler ! ! !");
+                    }
+                }
             } else if (currentClass.equals("unmarked")) { // Pebble marking (before color refienment)
-                clickedNode.setAttribute("ui.class", colourMode);
-                clickedNode.setAttribute("mark", colourMode);
-                swapColourMode();
+                // clickedNode.setAttribute("ui.class", colourMode);
+                // clickedNode.setAttribute("mark", colourMode);
+                if (!currentGraph.hasAttribute("pebbleStarted")){
+                    currentGraph.setAttribute("pebbleStarted", clickedNode.getId());
+                }
+                if (pebbleStarted) {
+                    if (pebbleGame.checkValidMove(currentGraph, colourMode)){
+                        clickedNode.setAttribute("ui.class", colourMode);
+                        clickedNode.setAttribute("mark", colourMode);
+                        pebbleGame.addPebble(clickedNode, currentGraph, colourMode);
+                        swapColourMode();
+                    }else{
+                        JOptionPane.showMessageDialog(null, "Spoiler already choose a node from this graph !", "Choose a different graph", JOptionPane.WARNING_MESSAGE);
+                        nodeInfoLabel.setText("! ! ! Duplicator should not choose node on the same graph as spoiler ! ! !");
+                    }
+                }
             } else if (currentClass.equals(colourMode)) {   //Remove Pebble Marking
                 clickedNode.setAttribute("ui.class", "unmarked");
                 clickedNode.removeAttribute("mark");
@@ -336,9 +362,12 @@ public class App implements ViewerListener {
                 clickedNode.setAttribute("ui.class", currentClass.equals("marked") ? "unmarked" : "marked");
             }
         }
-        //TODO
         if (!pebbleStarted) {
             nodeInfoLabel.setText(getNodeInformation(clickedNode)); 
+        }
+        if (pebbleStarted && pebbleGame.isGameEnded()){
+            resetPebble();
+            JOptionPane.showMessageDialog(null, "Spoiler Wins !", "Game Over", JOptionPane.INFORMATION_MESSAGE);
         }
 	}
 
@@ -421,6 +450,23 @@ public class App implements ViewerListener {
         spoilerMark.setVisible(false);
         duplicatorMark.setVisible(false);
         startPebbleButton.setVisible(true);
+        sleepTime = 0;
+        maxNode = 10;
+        nodeInfoLabel.setText("Click a node to get detailed attributes . . .");
+        startPebbleButton.setText("Start Pebble Game");
+
+    }
+
+    public void resetPebble(){
+        firstPebble = null;
+        colourMode= "marked";
+        pebbleStarted= false;
+        spoilerMark.setVisible(false);
+        duplicatorMark.setVisible(false);
+        startPebbleButton.setVisible(true);
+        startPebbleButton.setEnabled(false);
+        startPebbleButton.setText("Pebble Game Ended");
+        nodeInfoLabel.setText("Spoiler Wins ! ! !");
     }
 
     public void swapColourMode(){
@@ -509,4 +555,5 @@ public class App implements ViewerListener {
         resetDialog.setLocationRelativeTo(parentFrame); // Center relative to the parent
         resetDialog.setVisible(true);
     }
+
 }

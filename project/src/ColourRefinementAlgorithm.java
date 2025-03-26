@@ -56,10 +56,10 @@ public class ColourRefinementAlgorithm {
     }
 
     public void startup(Node source) {
-        //Iterator<? extends Node> k = source.getBreadthFirstIterator();
-        Iterator<? extends Node> k = source.getDepthFirstIterator();
-        Iterator<? extends Node> j = source.getDepthFirstIterator();
-        //Iterator<? extends Node> j = source.getBreadthFirstIterator();
+        // Iterator<? extends Node> k = source.getDepthFirstIterator();
+        // Iterator<? extends Node> j = source.getDepthFirstIterator();
+        Iterator<? extends Node> k = source.getBreadthFirstIterator();
+        Iterator<? extends Node> j = source.getBreadthFirstIterator();
         int currentColourIndex = -1;
         int degree = source.getDegree();
     
@@ -108,12 +108,12 @@ public class ColourRefinementAlgorithm {
     }
 
     public void nextRound(Node source) {
-        //Iterator<? extends Node> k = source.getBreadthFirstIterator();
-        //Iterator<? extends Node> j = source.getBreadthFirstIterator();
-        //Iterator<? extends Node> i = source.getBreadthFirstIterator();
-        Iterator<? extends Node> k = source.getDepthFirstIterator();
-        Iterator<? extends Node> j = source.getDepthFirstIterator();
-        Iterator<? extends Node> i = source.getDepthFirstIterator();
+        Iterator<? extends Node> k = source.getBreadthFirstIterator();
+        Iterator<? extends Node> j = source.getBreadthFirstIterator();
+        Iterator<? extends Node> i = source.getBreadthFirstIterator();
+        // Iterator<? extends Node> k = source.getDepthFirstIterator();
+        // Iterator<? extends Node> j = source.getDepthFirstIterator();
+        // Iterator<? extends Node> i = source.getDepthFirstIterator();
 
         colorChanges = false;
         colourTable.clear();
