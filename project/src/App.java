@@ -465,6 +465,8 @@ public class App implements ViewerListener {
     }
 
     public void swapColourMode(){
+        cRefineGraph = new ColourRefinementAlgorithm(currentLabel, sleepTime);
+        cRefineGraph.setCRefinementGoing(true);
         spoilerMark.setVisible(colourMode.equals("duplicator") ? true : false);
         duplicatorMark.setVisible(colourMode.equals("spoiler") ? true : false);
         colourMode = (colourMode.equals("duplicator") ? "spoiler" : "duplicator") ;

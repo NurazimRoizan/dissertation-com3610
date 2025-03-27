@@ -27,12 +27,14 @@ public class TestGraphManager{
             "}" +
         "node.spoiler {" +
             "   stroke-mode: plain;" +
-            "   stroke-color: blue;" +
+            "   stroke-color: black;" +
+            "   shape: box;" +
             "   stroke-width: 2px;" +
             "}" +
         "node.duplicator {" +
             "   stroke-mode: plain;" +
-            "   stroke-color: red;" +
+            "   shape: triangle;" +
+            "   stroke-color: black;" +
             "   stroke-width: 2px;" +
             "}" +
         "edge {" +
