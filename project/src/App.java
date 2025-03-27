@@ -366,7 +366,7 @@ public class App implements ViewerListener {
             nodeInfoLabel.setText(getNodeInformation(clickedNode)); 
         }
         if (pebbleStarted && pebbleGame.isGameEnded()){
-            resetPebble();
+            stopPebble();
             JOptionPane.showMessageDialog(null, "Spoiler Wins !", "Game Over", JOptionPane.INFORMATION_MESSAGE);
         }
 	}
@@ -444,20 +444,15 @@ public class App implements ViewerListener {
     }
 
     public void resetEverything(){
-        firstPebble = null;
-        colourMode= "marked";
-        pebbleStarted= false;
-        spoilerMark.setVisible(false);
-        duplicatorMark.setVisible(false);
-        startPebbleButton.setVisible(true);
+        stopPebble();
         sleepTime = 0;
         maxNode = 10;
         nodeInfoLabel.setText("Click a node to get detailed attributes . . .");
         startPebbleButton.setText("Start Pebble Game");
-
+        startPebbleButton.setEnabled(true);
     }
 
-    public void resetPebble(){
+    public void stopPebble(){
         firstPebble = null;
         colourMode= "marked";
         pebbleStarted= false;
