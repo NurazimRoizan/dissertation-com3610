@@ -28,7 +28,7 @@ public class TestGraphManager{
         "node.spoiler {" +
             "   stroke-mode: plain;" +
             "   stroke-color: black;" +
-            "   shape: box;" +
+            "   shape: triangle;" +
             "   stroke-width: 2px;" +
             "}" +
         "node.duplicator {" +

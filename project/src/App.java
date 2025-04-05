@@ -69,8 +69,8 @@ public class App implements ViewerListener {
         graph2 = TestGraphManager.createGraph("Graph B", gen2);
         currentGraph = graph;
 
-        graph.setAutoCreate(true);
-        graph.setStrict(false);
+        // graph.setAutoCreate(true);
+        // graph.setStrict(false);
         SwingViewer viewer = new SwingViewer(graph, SwingViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
         SwingViewer viewer2 = new SwingViewer(graph2, SwingViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
         viewer.enableAutoLayout();
@@ -85,8 +85,8 @@ public class App implements ViewerListener {
         JPanel bottomPanel = new JPanel(new GridLayout(2, 1));
         JPanel buttonPanel = new JPanel(new FlowLayout());
         JPanel centerPanel = new JPanel(new GridLayout(1, 2));
-        JLabel graphLabel1 = new JLabel("Graph A", SwingConstants.CENTER);
-        JLabel graphLabel2 = new JLabel("Graph B", SwingConstants.CENTER);
+        graphLabel1 = new JLabel("Graph A", SwingConstants.CENTER);
+        graphLabel2 = new JLabel("Graph B", SwingConstants.CENTER);
         nodeInfoLabel = new JLabel("Click a node to get detailed attributes . . .", SwingConstants.CENTER);
 
         javax.swing.border.Border border = BorderFactory.createLineBorder(Color.ORANGE, 3); 
@@ -450,6 +450,9 @@ public class App implements ViewerListener {
         nodeInfoLabel.setText("Click a node to get detailed attributes . . .");
         startPebbleButton.setText("Start Pebble Game");
         startPebbleButton.setEnabled(true);
+        graphLabel1.setText("Graph A");
+        graphLabel2.setText("Graph B");
+
     }
 
     public void stopPebble(){
