@@ -158,7 +158,7 @@ public class App implements ViewerListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Starting Algorithm . . .");
-                cRefineGraph = new ColourRefinementAlgorithm(currentLabel, sleepTime);
+                cRefineGraph = new ColourRefinementAlgorithm(graphLabel1, graph, graphLabel2, graph2 ,sleepTime);
                 cRefineGraph.setCRefinementGoing(true);
             }
         });
@@ -293,7 +293,7 @@ public class App implements ViewerListener {
                         firstPebble = currentGraph.getNode((String)currentGraph.getAttribute("pebbleStarted"));
                         System.out.println("starting refinement on node: " + firstPebble.getId());
                         cRefineGraph.cRefinement(currentGraph, firstPebble);
-                    }else{cRefineGraph.cRefinement(currentGraph);}  
+                    }else{cRefineGraph.cRefinement(graph, graph2);}  
                 }
             }
         }
@@ -468,7 +468,7 @@ public class App implements ViewerListener {
     }
 
     public void swapColourMode(){
-        cRefineGraph = new ColourRefinementAlgorithm(currentLabel, sleepTime);
+        cRefineGraph = new ColourRefinementAlgorithm(graphLabel1, graph, graphLabel2, graph2 ,sleepTime);
         cRefineGraph.setCRefinementGoing(true);
         spoilerMark.setVisible(colourMode.equals("duplicator") ? true : false);
         duplicatorMark.setVisible(colourMode.equals("spoiler") ? true : false);
