@@ -10,7 +10,7 @@ public class TestGraphManager{
             "   stroke-mode: plain;" +
             //"   text-color: white;" +
             "   size: 10px, 15px;" +
-            "   stroke-color: yellow;" +
+            "   stroke-color: black;" +
             "   size: 20px; fill-color: rgb(100,255,100), rgba(255, 255, 255, 0); fill-mode: gradient-radial;" +
             // "   shadow-mode: gradient-radial; shadow-width: 5px; shadow-color: #EEF, #000; shadow-offset: 2px;" +
             "}" +
@@ -27,14 +27,14 @@ public class TestGraphManager{
             "}" +
         "node.spoiler {" +
             "   stroke-mode: plain;" +
-            "   stroke-color: black;" +
+            "   stroke-color: yellow;" +
             "   shape: triangle;" +
             "   stroke-width: 2px;" +
             "}" +
         "node.duplicator {" +
             "   stroke-mode: plain;" +
             "   shape: triangle;" +
-            "   stroke-color: black;" +
+            "   stroke-color: yellow;" +
             "   stroke-width: 2px;" +
             "}" +
         "edge {" +

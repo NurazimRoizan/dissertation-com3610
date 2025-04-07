@@ -314,8 +314,6 @@ public class App implements ViewerListener {
 
         if (!"marked".equals(colourMode)) { // Marking Mode
             if (currentClass.equals("colour") && !currentClass.equals(colourMode)) { // Pebble Marking (after color refienment)
-                // clickedNode.setAttribute("ui.class", colourMode, "colour");
-                // clickedNode.setAttribute("mark", colourMode);
                 if (!currentGraph.hasAttribute("pebbleStarted")){
                     currentGraph.setAttribute("pebbleStarted", clickedNode.getId());
                 }
@@ -331,28 +329,16 @@ public class App implements ViewerListener {
                     }
                 }
             } else if (currentClass.equals("unmarked")) { // Pebble marking (before color refienment)
-                // clickedNode.setAttribute("ui.class", colourMode);
-                // clickedNode.setAttribute("mark", colourMode);
                 if (!currentGraph.hasAttribute("pebbleStarted")){
                     currentGraph.setAttribute("pebbleStarted", clickedNode.getId());
                 }
                 if (pebbleStarted) {
-                    if (pebbleGame.checkValidMove(currentGraph, colourMode)){
-                        clickedNode.setAttribute("ui.class", colourMode);
-                        clickedNode.setAttribute("mark", colourMode);
-                        pebbleGame.addPebble(clickedNode, currentGraph, colourMode);
-                        swapColourMode();
-                    }else{
-                        JOptionPane.showMessageDialog(null, "Spoiler already choose a node from this graph !", "Choose a different graph", JOptionPane.WARNING_MESSAGE);
-                        nodeInfoLabel.setText("! ! ! Duplicator should not choose node on the same graph as spoiler ! ! !");
-                    }
+                    playerMovePebble(clickedNode);
                 }
             } else if (currentClass.equals(colourMode)) {   //Remove Pebble Marking
-                clickedNode.setAttribute("ui.class", "unmarked");
-                clickedNode.removeAttribute("mark");
+                playerMovePebble(clickedNode);
             } else { // add colour or remove colour when clicked appropriately
-                clickedNode.setAttribute("ui.class", clickedNode.hasAttribute("ui.color") ? "colour" : "unmarked");
-                clickedNode.removeAttribute("mark");
+                playerMovePebble(clickedNode);
             }
         }else { // Default mode (No marking)
             if (clickedNode.hasAttribute("ui.color")) { //Remove or add colour 
@@ -360,6 +346,7 @@ public class App implements ViewerListener {
                 clickedNode.setAttribute("ui.class", currentClass.equals("colour") ? "unmarked" : "colour");
             } else {
                 clickedNode.setAttribute("ui.class", currentClass.equals("marked") ? "unmarked" : "marked");
+                System.out.println("attempt 3");
             }
         }
         if (!pebbleStarted) {
@@ -468,12 +455,34 @@ public class App implements ViewerListener {
     }
 
     public void swapColourMode(){
-        cRefineGraph = new ColourRefinementAlgorithm(graphLabel1, graph, graphLabel2, graph2 ,sleepTime);
-        cRefineGraph.setCRefinementGoing(true);
+        // cRefineGraph = new ColourRefinementAlgorithm(graphLabel1, graph, graphLabel2, graph2 ,sleepTime);
+        // cRefineGraph.setCRefinementGoing(true);
         spoilerMark.setVisible(colourMode.equals("duplicator") ? true : false);
         duplicatorMark.setVisible(colourMode.equals("spoiler") ? true : false);
         colourMode = (colourMode.equals("duplicator") ? "spoiler" : "duplicator") ;
         nodeInfoLabel.setText(colourMode.substring(0, 1).toUpperCase() + colourMode.substring(1) + " turn");
+    }
+
+    public void playerMovePebble(Node clickedNode){
+        if (clickedNode.hasAttribute("mark")) {
+            if(colourMode.equals("spoiler")){
+                pebbleGame.removePebble(clickedNode);
+                nodeInfoLabel.setText(colourMode+ " picked up the pebble");
+            }else{
+                JOptionPane.showMessageDialog(null, "Duplicator can not pick up pebble !!", "Choose a different node", JOptionPane.WARNING_MESSAGE);
+                nodeInfoLabel.setText("! ! ! Duplicator should not choose placed pebble ! ! !");
+            }
+        }else{
+            if (pebbleGame.checkValidMove(currentGraph, colourMode)){
+                clickedNode.setAttribute("ui.class", colourMode);
+                clickedNode.setAttribute("mark", colourMode);
+                pebbleGame.addPebble(clickedNode, currentGraph, colourMode);
+                swapColourMode();
+            }else{
+                JOptionPane.showMessageDialog(null, "Spoiler already choose a node from this graph !", "Choose a different graph", JOptionPane.WARNING_MESSAGE);
+                nodeInfoLabel.setText("! ! ! Duplicator should not choose node on the same graph as spoiler ! ! !");
+            }
+        }
     }
 
     private void showResetDialog(JFrame parentFrame) {

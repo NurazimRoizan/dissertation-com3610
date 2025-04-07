@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -7,10 +8,8 @@ import org.graphstream.graph.Node;
 public class PebbleGameState {
     private List<Node> pebblesG1;
     private List<Node> pebblesG2;
-    private Graph graph1;
-    private Graph graph2;
+    private Graph graph1, graph2, currentSpoilerGraph;
     private Node currentSpoilerPebble;
-    private Graph currentSpoilerGraph;
     private boolean pebbleGameEnded;
 
 
@@ -108,11 +107,63 @@ public class PebbleGameState {
         return true; // All checks passed
     }
 
+    /**
+     * Removes the pebble pair associated with the clickedNode.
+     * If the clickedNode is part of a pair (present in either pebblesG1 or pebblesG2),
+     * the corresponding pair is removed from both lists.
+     * This represents Spoiler picking up a pebble pair to reuse the pebble index.
+     *
+     * @param clickedNode The node instance (in graph1 or graph2) where the pebble to be removed lies.
+     * @return true if a pebble pair was successfully removed, false otherwise (e.g., node had no pebble).
+     */
+    public boolean removePebble(Node clickedNode){
+        if (clickedNode == null) {
+             System.out.println("Error: Cannot remove pebble from a null node.");
+             return false;
+        }
+
+        int indexToRemove = -1; // Initialize to an invalid index
+
+        // Find the index of the pebble pair corresponding to the clicked node
+        for (int i = 0; i < pebblesG1.size(); i++) {
+            // Check if the clicked node matches either node in the current pair
+            // Using Objects.equals for null-safety, though nodes here shouldn't be null
+            if (Objects.equals(clickedNode, pebblesG1.get(i)) || Objects.equals(clickedNode, pebblesG2.get(i))) {
+                indexToRemove = i;
+                break; // Found the pair, exit the loop
+            }
+        }
+        System.out.println("========================================================");
+        // If a matching pair was found, remove it from both lists
+        if (indexToRemove != -1) {
+            Node removedG1 = pebblesG1.remove(indexToRemove);
+            Node removedG2 = pebblesG2.remove(indexToRemove);
+            System.out.println("Removed pebble pair: (" + removedG1.getId() + ", " + removedG2.getId() + ")");
+            removedG1.removeAttribute("mark");
+            removedG2.removeAttribute("mark");
+            removedG1.setAttribute("ui.class", clickedNode.hasAttribute("ui.color") ? "colour" : "unmarked");
+            removedG2.setAttribute("ui.class", clickedNode.hasAttribute("ui.color") ? "colour" : "unmarked");
+
+            return true; // Indicate success
+        } else {
+            System.out.println("Node " + clickedNode.getId() + " does not have an active pebble to remove.");
+            return false; // Indicate pebble not found
+        }
+    }
+
     public boolean checkValidMove(Graph currentGraph, String currentMode){
         return !(currentMode.equals("duplicator") && currentSpoilerGraph.equals(currentGraph) );
     }
 
     public boolean isGameEnded(){
         return pebbleGameEnded;
+    }
+
+    public List<Node> getPebblesG1() {
+        return pebblesG1;
+    }
+
+    public List<Node> getPebblesG2() {
+        return pebblesG2;
     }
 }
