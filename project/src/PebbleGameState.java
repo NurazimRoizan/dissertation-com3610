@@ -11,15 +11,17 @@ public class PebbleGameState {
     private Graph graph1, graph2, currentSpoilerGraph;
     private Node currentSpoilerPebble;
     private boolean pebbleGameEnded;
-    private int maxPebble;
+    private int maxPebble, maxRound, currentRound;
 
 
-    public PebbleGameState(Graph graph1, Graph graph2, int k){
+    public PebbleGameState(Graph graph1, Graph graph2, int k, int n){
         this.graph1= graph1;
         this.graph2= graph2;
         this.pebblesG1 = new ArrayList<>();
         this.pebblesG2 = new ArrayList<>();
         this.maxPebble = k;
+        this.maxRound = n;
+        this.currentRound = 1;
     }
 
     public void addPebble(Node newNode, Graph currentGraph, String currentMode) {
@@ -67,6 +69,11 @@ public class PebbleGameState {
                 // Reset for the next round (Spoiler's turn)
                 currentSpoilerPebble = null;
                 currentSpoilerGraph = null;
+                currentRound ++;
+            }
+            // Check for maxRound
+            if (maxRoundReached()) {
+                pebbleGameEnded = true;
             }
         }
     }
@@ -80,11 +87,6 @@ public class PebbleGameState {
      * @return true if the partial isomorphism property holds, false otherwise.
      */
     public boolean checkPartialIso(Node newNodeG1, Node newNodeG2) {
-        System.out.println("pebbleG1 has :");
-        System.out.println(this.pebblesG1);
-        System.out.println("pebbleG2 has :");
-        System.out.println(this.pebblesG2);
-
 
         for (int i = 0; i < pebblesG1.size(); i++) {
             Node existingG1 = this.pebblesG1.get(i);
@@ -94,12 +96,6 @@ public class PebbleGameState {
             // Assumes undirected graphs via hasEdgeBetween. Modify if directed needed.
             boolean adjacentInG1 = newNodeG1.hasEdgeBetween(existingG1);
             boolean adjacentInG2 = newNodeG2.hasEdgeBetween(existingG2);
-            System.out.println("graph 1 = "+ adjacentInG1 + "==============================");
-            System.out.println(newNodeG1 + " vs " + existingG1);
-            System.out.println("graph 2 = "+ adjacentInG2+ "==============================");
-            System.out.println(newNodeG2 + " vs " + existingG2);
-
-
 
             if (adjacentInG1 != adjacentInG2) {
                 return false; // Adjacency mismatch
@@ -153,16 +149,25 @@ public class PebbleGameState {
         }
     }
 
-    public boolean checkValidMove(Graph currentGraph, String currentMode){
-        return !(currentMode.equals("duplicator") && currentSpoilerGraph.equals(currentGraph) );
-    }
+    public boolean checkValidMove(Graph currentGraph, String currentMode){return !(currentMode.equals("duplicator") && currentSpoilerGraph.equals(currentGraph) );}
 
-    public boolean availablePebble(){
-        return (pebblesG1.size() < maxPebble);
-    }
+    public boolean availablePebble(){return (pebblesG1.size() < maxPebble);}
+
+    public int getCurrentRound() {return this.currentRound;}
+
+    public boolean maxRoundReached(){return (currentRound > maxRound);}
 
     public boolean isGameEnded(){
         return pebbleGameEnded;
+    }
+
+    /**
+     * Checks the current winner of the pebble game state
+     *
+     * @return "spoiler" if spoiler wins or "duplicator" if duplicator wins.
+     */
+    public String checkWinner(){
+        return ("duplicator");
     }
 
     public List<Node> getPebblesG1() {

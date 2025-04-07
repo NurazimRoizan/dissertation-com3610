@@ -111,7 +111,6 @@ public class App implements ViewerListener {
                 if (spoilerMark.isSelected()){
                     spoilerMark.setText("Spoiler move");
                     System.out.println("Spoiler now can mark the node");
-                    nodeInfoLabel.setText("Spoiler Turn");
 
                     colourMode = "spoiler";
                 }else{
@@ -144,10 +143,10 @@ public class App implements ViewerListener {
             public void actionPerformed(ActionEvent e) {
                 startPebbleButton.setVisible(false);
                 spoilerMark.setVisible(true);
-                nodeInfoLabel.setText("Spoiler Turn");
+                nodeInfoLabel.setText("Round 1 : Spoiler Turn");
                 colourMode = "spoiler";
                 pebbleStarted = true;
-                pebbleGame = new PebbleGameState(graph, graph2, 3);
+                pebbleGame = new PebbleGameState(graph, graph2, 3, 5);
             }
         });
 
@@ -321,7 +320,7 @@ public class App implements ViewerListener {
                     if (pebbleGame.checkValidMove(currentGraph, colourMode)){
                         if (!pebbleGame.availablePebble()){
                             JOptionPane.showMessageDialog(null, "No more pebble can be placed. Try picking up other placed pebbles instead", "Max pebbles reached", JOptionPane.WARNING_MESSAGE);
-                            nodeInfoLabel.setText("! ! ! K number of pebbles reached ! ! !");
+                            nodeInfoLabel.setText(" k number of pebbles reached");
                         }else{
                             clickedNode.setAttribute("ui.class", colourMode, "colour");
                             clickedNode.setAttribute("mark", colourMode);
@@ -359,7 +358,7 @@ public class App implements ViewerListener {
         }
         if (pebbleStarted && pebbleGame.isGameEnded()){
             stopPebble();
-            JOptionPane.showMessageDialog(null, "Spoiler Wins !", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+            displayWinner();
         }
 	}
 
@@ -456,7 +455,16 @@ public class App implements ViewerListener {
         startPebbleButton.setVisible(true);
         startPebbleButton.setEnabled(false);
         startPebbleButton.setText("Pebble Game Ended");
-        nodeInfoLabel.setText("Spoiler Wins ! ! !");
+    }
+
+    public void displayWinner(){
+        if (pebbleGame.maxRoundReached()) {
+            nodeInfoLabel.setText("Duplicator won up to "+ (pebbleGame.getCurrentRound()-1) + " round");
+            JOptionPane.showMessageDialog(null, "Duplicator maintains the win !", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+        }else{
+            nodeInfoLabel.setText("Spoiler Won in "+ (pebbleGame.getCurrentRound()) + " Round");
+            JOptionPane.showMessageDialog(null, "Spoiler Wins !", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
     public void swapColourMode(){
@@ -465,7 +473,7 @@ public class App implements ViewerListener {
         spoilerMark.setVisible(colourMode.equals("duplicator") ? true : false);
         duplicatorMark.setVisible(colourMode.equals("spoiler") ? true : false);
         colourMode = (colourMode.equals("duplicator") ? "spoiler" : "duplicator") ;
-        nodeInfoLabel.setText(colourMode.substring(0, 1).toUpperCase() + colourMode.substring(1) + " turn");
+        nodeInfoLabel.setText("Round " + (pebbleGame.getCurrentRound()) + " : " +colourMode.substring(0, 1).toUpperCase() + colourMode.substring(1) + " turn");
     }
 
     public void playerMovePebble(Node clickedNode){
@@ -489,9 +497,8 @@ public class App implements ViewerListener {
                     nodeInfoLabel.setText("! ! ! Duplicator should not choose node on the same graph as spoiler ! ! !");
                 }
             } else{
-                System.out.println("------------------------------------------");
                 JOptionPane.showMessageDialog(null, "No more pebble can be placed. Try picking up other placed pebbles instead", "Max pebbles reached", JOptionPane.WARNING_MESSAGE);
-                nodeInfoLabel.setText("! ! ! k number of pebbles reached ! ! !");
+                nodeInfoLabel.setText("k number of pebbles reached");
             }
             
         }
