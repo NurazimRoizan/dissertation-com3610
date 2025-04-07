@@ -147,7 +147,7 @@ public class App implements ViewerListener {
                 nodeInfoLabel.setText("Spoiler Turn");
                 colourMode = "spoiler";
                 pebbleStarted = true;
-                pebbleGame = new PebbleGameState(graph, graph2);
+                pebbleGame = new PebbleGameState(graph, graph2, 3);
             }
         });
 
@@ -319,10 +319,15 @@ public class App implements ViewerListener {
                 }
                 if (pebbleStarted) {
                     if (pebbleGame.checkValidMove(currentGraph, colourMode)){
-                        clickedNode.setAttribute("ui.class", colourMode, "colour");
-                        clickedNode.setAttribute("mark", colourMode);
-                        pebbleGame.addPebble(clickedNode, currentGraph, colourMode);
-                        swapColourMode();
+                        if (!pebbleGame.availablePebble()){
+                            JOptionPane.showMessageDialog(null, "No more pebble can be placed. Try picking up other placed pebbles instead", "Max pebbles reached", JOptionPane.WARNING_MESSAGE);
+                            nodeInfoLabel.setText("! ! ! K number of pebbles reached ! ! !");
+                        }else{
+                            clickedNode.setAttribute("ui.class", colourMode, "colour");
+                            clickedNode.setAttribute("mark", colourMode);
+                            pebbleGame.addPebble(clickedNode, currentGraph, colourMode);
+                            swapColourMode();
+                        }
                     }else{
                         JOptionPane.showMessageDialog(null, "Spoiler already choose a node from this graph !", "Choose a different graph", JOptionPane.WARNING_MESSAGE);
                         nodeInfoLabel.setText("! ! ! Duplicator should not choose node on the same graph as spoiler ! ! !");
@@ -473,15 +478,22 @@ public class App implements ViewerListener {
                 nodeInfoLabel.setText("! ! ! Duplicator should not choose placed pebble ! ! !");
             }
         }else{
-            if (pebbleGame.checkValidMove(currentGraph, colourMode)){
-                clickedNode.setAttribute("ui.class", colourMode);
-                clickedNode.setAttribute("mark", colourMode);
-                pebbleGame.addPebble(clickedNode, currentGraph, colourMode);
-                swapColourMode();
-            }else{
-                JOptionPane.showMessageDialog(null, "Spoiler already choose a node from this graph !", "Choose a different graph", JOptionPane.WARNING_MESSAGE);
-                nodeInfoLabel.setText("! ! ! Duplicator should not choose node on the same graph as spoiler ! ! !");
+            if (pebbleGame.availablePebble()){
+                if (pebbleGame.checkValidMove(currentGraph, colourMode)){
+                    clickedNode.setAttribute("ui.class", colourMode);
+                    clickedNode.setAttribute("mark", colourMode);
+                    pebbleGame.addPebble(clickedNode, currentGraph, colourMode);
+                    swapColourMode();
+                }else{
+                    JOptionPane.showMessageDialog(null, "Spoiler already choose a node from this graph !", "Choose a different graph", JOptionPane.WARNING_MESSAGE);
+                    nodeInfoLabel.setText("! ! ! Duplicator should not choose node on the same graph as spoiler ! ! !");
+                }
+            } else{
+                System.out.println("------------------------------------------");
+                JOptionPane.showMessageDialog(null, "No more pebble can be placed. Try picking up other placed pebbles instead", "Max pebbles reached", JOptionPane.WARNING_MESSAGE);
+                nodeInfoLabel.setText("! ! ! k number of pebbles reached ! ! !");
             }
+            
         }
     }
 

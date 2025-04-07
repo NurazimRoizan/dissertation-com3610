@@ -11,13 +11,15 @@ public class PebbleGameState {
     private Graph graph1, graph2, currentSpoilerGraph;
     private Node currentSpoilerPebble;
     private boolean pebbleGameEnded;
+    private int maxPebble;
 
 
-    public PebbleGameState(Graph graph1, Graph graph2){
+    public PebbleGameState(Graph graph1, Graph graph2, int k){
         this.graph1= graph1;
         this.graph2= graph2;
         this.pebblesG1 = new ArrayList<>();
         this.pebblesG2 = new ArrayList<>();
+        this.maxPebble = k;
     }
 
     public void addPebble(Node newNode, Graph currentGraph, String currentMode) {
@@ -153,6 +155,10 @@ public class PebbleGameState {
 
     public boolean checkValidMove(Graph currentGraph, String currentMode){
         return !(currentMode.equals("duplicator") && currentSpoilerGraph.equals(currentGraph) );
+    }
+
+    public boolean availablePebble(){
+        return (pebblesG1.size() < maxPebble);
     }
 
     public boolean isGameEnded(){
