@@ -6,6 +6,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
+import java.util.Map;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import java.awt.FlowLayout;
@@ -54,6 +55,8 @@ public class App implements ViewerListener {
     protected JToggleButton duplicatorMark = new JToggleButton("Duplicator Move");
     protected PebbleGameState pebbleGame;
     protected JButton startPebbleButton;
+    protected Map<String, Integer> finalColors;
+    public static final String FINAL_COLOR_ATTR = "color_refinement.final_color"; // Public for easy access
 
 
     public static void main(String args[]) {
@@ -65,8 +68,10 @@ public class App implements ViewerListener {
         Generator gen = new BarabasiAlbertGenerator(1);
         Generator gen2 = new BarabasiAlbertGenerator(1);
         //Generator gen2 = new DorogovtsevMendesGenerator();
-        graph = TestGraphManager.createGraph("Graph A", gen);
-        graph2 = TestGraphManager.createGraph("Graph B", gen2);
+        //graph = TestGraphManager.createGraph("Graph A", gen);
+        //graph2 = TestGraphManager.createGraph("Graph B", gen2);
+        graph = TestGraphManager.createExampleGraph1();
+        graph2 = TestGraphManager.createExampleGraph2();
         currentGraph = graph;
 
         // graph.setAutoCreate(true);
@@ -159,6 +164,7 @@ public class App implements ViewerListener {
                 System.out.println("Starting Algorithm . . .");
                 cRefineGraph = new ColourRefinementAlgorithm(graphLabel1, graph, graphLabel2, graph2 ,sleepTime);
                 cRefineGraph.setCRefinementGoing(true);
+                //finalColors = ColorRefinement.refine(graph, graph2, true);
             }
         });
         JButton myButton5 = new JButton("Back Iteration");
@@ -295,6 +301,39 @@ public class App implements ViewerListener {
                     }else{cRefineGraph.cRefinement(graph, graph2);}  
                 }
             }
+            // ==============Test new CR algo-------------------
+            // if (finalColors != null) {
+            //     System.out.println("\nFinal Colors Map (NodeID -> Color):");
+            //     finalColors.forEach((nodeId, color) ->
+            //         System.out.println("  Node " + nodeId + ": Color " + color)
+            //     );
+    
+            //     // Assign colors visually for display using a predefined color palette
+            //     String[] uiColors = {"blue", "red", "green", "yellow", "purple", "orange", "pink", "cyan", "magenta", "gray", "brown", "lime"};
+            //     graph.nodes().forEach(n -> {
+            //          Object colorAttr = n.getAttribute(FINAL_COLOR_ATTR);
+            //          if (colorAttr instanceof Integer) {
+            //              int colorIndex = (Integer) colorAttr;
+            //              String colorString = uiColors[Math.abs(colorIndex) % uiColors.length]; // Use modulo and abs
+            //              n.setAttribute("ui.style", "fill-color: " + colorString + "; size: 20px; text-size: 16px;");
+            //              n.setAttribute("ui.label", n.getId() + " [" + colorIndex + "]"); // Show color in label
+            //          } else {
+            //              n.setAttribute("ui.label", n.getId() + " [NoColor]");
+            //          }
+    
+            //     });
+            //      graph2.nodes().forEach(n -> {
+            //         Object colorAttr = n.getAttribute(FINAL_COLOR_ATTR);
+            //          if (colorAttr instanceof Integer) {
+            //              int colorIndex = (Integer) colorAttr;
+            //              String colorString = uiColors[Math.abs(colorIndex) % uiColors.length]; // Use modulo and abs
+            //              n.setAttribute("ui.style", "fill-color: " + colorString + "; size: 20px; text-size: 16px;");
+            //              n.setAttribute("ui.label", n.getId() + " [" + colorIndex + "]"); // Show color in label
+            //           } else {
+            //              n.setAttribute("ui.label", n.getId() + " [NoColor]");
+            //          }
+            //     });
+            // }
         }
 
         
