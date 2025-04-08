@@ -201,11 +201,12 @@ public class ColourRefinementAlgorithm {
         String currentSignature = String.valueOf(source.getAttribute("signature"+(round-1)));
         String currentDegree = currentSignature.substring(0,1);
         StringBuilder neighbourSignature = new StringBuilder();
-        if (source.getAttribute("mark")=="spoiler"){
-            neighbourSignature.append("s");
-        }else if (source.getAttribute("mark")=="duplicator"){
-            neighbourSignature.append("d");
-        }
+        // if (source.getAttribute("mark")=="spoiler"){
+        //     neighbourSignature.append("s");
+        // }else if (source.getAttribute("mark")=="duplicator"){
+        //     neighbourSignature.append("d");
+        // }
+        if (source.hasAttribute("mark")){neighbourSignature.append("p");}
         neighbourNodes.forEach(neighbourNode -> {
             neighbourSignature.append(String.valueOf(neighbourNode.getAttribute("signature"+(round-1))));
             //System.out.println("Neighbor color signature: " + neighbourSignature);

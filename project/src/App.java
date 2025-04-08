@@ -46,7 +46,7 @@ public class App implements ViewerListener {
     protected boolean cRefinementGoing = false;
     protected JLabel currentLabel, graphLabel1, graphLabel2, nodeInfoLabel;
     protected int sleepTime = 0;
-    protected int maxNode = 10;
+    protected int maxNode = 5;
     //protected Generator gen = new BarabasiAlbertGenerator(1);
     protected ViewerPipe fromViewer; 
     protected boolean pebbleStarted = false;
@@ -151,7 +151,7 @@ public class App implements ViewerListener {
                 nodeInfoLabel.setText("Round 1 : Spoiler Turn");
                 colourMode = "spoiler";
                 pebbleStarted = true;
-                pebbleGame = new PebbleGameState(graph, graph2, 3, 5);
+                pebbleGame = new PebbleGameState(graph, graph2, 2, 5);
             }
         });
 
@@ -301,39 +301,39 @@ public class App implements ViewerListener {
                     }else{cRefineGraph.cRefinement(graph, graph2);}  
                 }
             }
-            // ==============Test new CR algo-------------------
-            // if (finalColors != null) {
-            //     System.out.println("\nFinal Colors Map (NodeID -> Color):");
-            //     finalColors.forEach((nodeId, color) ->
-            //         System.out.println("  Node " + nodeId + ": Color " + color)
-            //     );
+            //==============Test new CR algo-------------------
+            if (finalColors != null) {
+                System.out.println("\nFinal Colors Map (NodeID -> Color):");
+                finalColors.forEach((nodeId, color) ->
+                    System.out.println("  Node " + nodeId + ": Color " + color)
+                );
     
-            //     // Assign colors visually for display using a predefined color palette
-            //     String[] uiColors = {"blue", "red", "green", "yellow", "purple", "orange", "pink", "cyan", "magenta", "gray", "brown", "lime"};
-            //     graph.nodes().forEach(n -> {
-            //          Object colorAttr = n.getAttribute(FINAL_COLOR_ATTR);
-            //          if (colorAttr instanceof Integer) {
-            //              int colorIndex = (Integer) colorAttr;
-            //              String colorString = uiColors[Math.abs(colorIndex) % uiColors.length]; // Use modulo and abs
-            //              n.setAttribute("ui.style", "fill-color: " + colorString + "; size: 20px; text-size: 16px;");
-            //              n.setAttribute("ui.label", n.getId() + " [" + colorIndex + "]"); // Show color in label
-            //          } else {
-            //              n.setAttribute("ui.label", n.getId() + " [NoColor]");
-            //          }
+                // Assign colors visually for display using a predefined color palette
+                String[] uiColors = {"blue", "red", "green", "yellow", "purple", "orange", "pink", "cyan", "magenta", "gray", "brown", "lime"};
+                graph.nodes().forEach(n -> {
+                     Object colorAttr = n.getAttribute(FINAL_COLOR_ATTR);
+                     if (colorAttr instanceof Integer) {
+                         int colorIndex = (Integer) colorAttr;
+                         String colorString = uiColors[Math.abs(colorIndex) % uiColors.length]; // Use modulo and abs
+                         n.setAttribute("ui.style", "fill-color: " + colorString + "; size: 20px; text-size: 16px;");
+                         n.setAttribute("ui.label", n.getId() + " [" + colorIndex + "]"); // Show color in label
+                     } else {
+                         n.setAttribute("ui.label", n.getId() + " [NoColor]");
+                     }
     
-            //     });
-            //      graph2.nodes().forEach(n -> {
-            //         Object colorAttr = n.getAttribute(FINAL_COLOR_ATTR);
-            //          if (colorAttr instanceof Integer) {
-            //              int colorIndex = (Integer) colorAttr;
-            //              String colorString = uiColors[Math.abs(colorIndex) % uiColors.length]; // Use modulo and abs
-            //              n.setAttribute("ui.style", "fill-color: " + colorString + "; size: 20px; text-size: 16px;");
-            //              n.setAttribute("ui.label", n.getId() + " [" + colorIndex + "]"); // Show color in label
-            //           } else {
-            //              n.setAttribute("ui.label", n.getId() + " [NoColor]");
-            //          }
-            //     });
-            // }
+                });
+                 graph2.nodes().forEach(n -> {
+                    Object colorAttr = n.getAttribute(FINAL_COLOR_ATTR);
+                     if (colorAttr instanceof Integer) {
+                         int colorIndex = (Integer) colorAttr;
+                         String colorString = uiColors[Math.abs(colorIndex) % uiColors.length]; // Use modulo and abs
+                         n.setAttribute("ui.style", "fill-color: " + colorString + "; size: 20px; text-size: 16px;");
+                         n.setAttribute("ui.label", n.getId() + " [" + colorIndex + "]"); // Show color in label
+                      } else {
+                         n.setAttribute("ui.label", n.getId() + " [NoColor]");
+                     }
+                });
+            }
         }
 
         
@@ -436,20 +436,29 @@ public class App implements ViewerListener {
     public void newGraphGenerator(int choosenType, Graph choosenGraph){
         Graph newGraph;
         switch (choosenType) {
-            case 1:
-                newGraph = TestGraphManager.createGraph("Graph", new BarabasiAlbertGenerator(1), maxNode);
+            case 3: // Barabasi
+                //newGraph = TestGraphManager.createGraph("Graph", new BarabasiAlbertGenerator(1), maxNode);
+                newGraph = TestGraphManager.createExampleGraph1();
                 break;
-            case 2:
-                newGraph = TestGraphManager.createGraph("Graph", new DorogovtsevMendesGenerator(), maxNode);
+            case 2: // Dorogo
+                //newGraph = TestGraphManager.createGraph("Graph", new DorogovtsevMendesGenerator(), maxNode);
+                newGraph = TestGraphManager.createExampleGraph2();
                 break;
-            case 0: //Simple
-                newGraph = TestGraphManager.createGraph("Graph",new WattsStrogatzGenerator(maxNode,2,0.5), maxNode);
+            case 0: //Simple stub
+                //newGraph = TestGraphManager.createGraph("Graph",new WattsStrogatzGenerator(maxNode,2,0.5), maxNode);
+                newGraph = TestGraphManager.createPartialIso_G1_K4Handle();
                 break;
-            case 3:
+            case 1: //  Simple 2 Stub
+                //newGraph = TestGraphManager.createGraph("Graph", new WattsStrogatzGenerator(maxNode,2,0.5), maxNode);
+                newGraph = TestGraphManager.createPartialIso_G2_K4Stubs();
+                break;
+            case 4: //  Simple
                 newGraph = TestGraphManager.createGraph("Graph", new WattsStrogatzGenerator(maxNode,2,0.5), maxNode);
                 break;
             default:
                 newGraph = TestGraphManager.createGraph("Graph", new WattsStrogatzGenerator(10,2,0.5), maxNode);
+                //newGraph = TestGraphManager.createPathP4("NonIso_P4");
+
         }
         System.out.println("Getting new graph");
         choosenGraph.clear();
@@ -476,7 +485,7 @@ public class App implements ViewerListener {
     public void resetEverything(){
         stopPebble();
         sleepTime = 0;
-        maxNode = 10;
+        maxNode = 5;
         nodeInfoLabel.setText("Click a node to get detailed attributes . . .");
         startPebbleButton.setText("Start Pebble Game");
         startPebbleButton.setEnabled(true);
@@ -507,8 +516,10 @@ public class App implements ViewerListener {
     }
 
     public void swapColourMode(){
-        // cRefineGraph = new ColourRefinementAlgorithm(graphLabel1, graph, graphLabel2, graph2 ,sleepTime);
-        // cRefineGraph.setCRefinementGoing(true);
+        if (colourMode.equals("duplicator")) {
+            cRefineGraph = new ColourRefinementAlgorithm(graphLabel1, graph, graphLabel2, graph2 ,sleepTime);
+            cRefineGraph.setCRefinementGoing(true);
+        }
         spoilerMark.setVisible(colourMode.equals("duplicator") ? true : false);
         duplicatorMark.setVisible(colourMode.equals("spoiler") ? true : false);
         colourMode = (colourMode.equals("duplicator") ? "spoiler" : "duplicator") ;
@@ -548,7 +559,7 @@ public class App implements ViewerListener {
         resetDialog.setLayout(new BorderLayout());
 
         JLabel graphTypeLabel = new JLabel("Choose graph type:", SwingConstants.CENTER);
-        String[] graphOptions = {"Simple", "Barabasi", "Dorogovt", "Random"};
+        String[] graphOptions = {"Simple Stub", "Simple Stub 2", "Simple Triangle", "Simple Star", "Complex Random"};
 
         JCheckBox clearBothGraphCheckBox = new JCheckBox("CLEAR BOTH GRAPH");
         JPanel checkboxPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -601,7 +612,7 @@ public class App implements ViewerListener {
         buttonPanel.add(cancelButton);
 
         JLabel maxNodeLabel = new JLabel("Maximum Node per Graph:");
-        SpinnerNumberModel model = new SpinnerNumberModel(10, 1, 100, 10);
+        SpinnerNumberModel model = new SpinnerNumberModel(5, 1, 100, 5);
         JSpinner maxNumberNodeSpinner = new JSpinner(model);
         maxNumberNodeSpinner.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {

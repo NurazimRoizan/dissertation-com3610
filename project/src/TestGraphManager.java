@@ -123,272 +123,226 @@ public class TestGraphManager{
     }
 
     /**
-     * Creates G1 for the CFI-inspired example:
-     * A C6 cycle with a P2 gadget (path) attached to each cycle node.
-     * Node IDs: Cycle nodes 0-5, Path nodes 10-15, Leaf nodes 20-25.
-     * @return Graph G1.
+     * Creates Graph G1: A 2x2 grid base {0,1,2,3} with a "handle" {4,5}
+     * attached to nodes 0 and 1. Node 5 is a leaf.
+     * Contains C4 subgraph {0,1,3,2}.
+     * @return G1 graph.
      */
-    public static Graph createCFI_G1() {
-        Graph g1 = new SingleGraph("G1_CFI");
-
-        Node[] cycle1 = new Node[6];
-        for (int i = 0; i < 6; i++) {
-            String cId = String.valueOf(i);
-            String pId = String.valueOf(i + 10);
-            String lId = String.valueOf(i + 20);
-
-            cycle1[i] = g1.addNode(cId);
-            cycle1[i].setAttribute("ui.label", cId);
-            Node p1 = g1.addNode(pId);
-            Node l1 = g1.addNode(lId);
-            p1.setAttribute("ui.label", pId);
-            l1.setAttribute("ui.label", lId);
-
-            g1.addEdge("g1_c" + i + "_p" + i, cycle1[i], p1);
-            g1.addEdge("g1_p" + i + "_l" + i, p1, l1);
-        }
-        for (int i = 0; i < 6; i++) {
-            g1.addEdge("g1_cycle_" + i, cycle1[i], cycle1[(i + 1) % 6]);
-        }
-
-        g1.setAttribute("ui.stylesheet", styleSheet);
-        for (Node node : g1) {
-            node.setAttribute("ui.class", "unmarked");
-        }
-        return g1;
-    }
-
-    /**
-     * Creates G2 for the CFI-inspired example:
-     * Two disjoint C3 cycles, each with a P2 gadget attached to each cycle node.
-     * Node IDs: CycleA 100-102, GadgetA Path 110-112, GadgetA Leaf 120-122
-     * CycleB 200-202, GadgetB Path 210-212, GadgetB Leaf 220-222
-     * @return Graph G2.
-     */
-    public static Graph createCFI_G2() {
-        Graph g2 = new SingleGraph("G2_CFI");
-
-        Node[] cycle2a = new Node[3];
-        Node[] cycle2b = new Node[3];
-
-        // First C3 + Gadgets
-        for (int i = 0; i < 3; i++) {
-            String cId = String.valueOf(i + 100);
-            String pId = String.valueOf(i + 110);
-            String lId = String.valueOf(i + 120);
-
-            cycle2a[i] = g2.addNode(cId);
-            cycle2a[i].setAttribute("ui.label", cId);
-            Node p2a = g2.addNode(pId);
-            Node l2a = g2.addNode(lId);
-            p2a.setAttribute("ui.label", pId);
-            l2a.setAttribute("ui.label", lId);
-
-            g2.addEdge("g2a_c" + i + "_p" + i, cycle2a[i], p2a);
-            g2.addEdge("g2a_p" + i + "_l" + i, p2a, l2a);
-        }
-        for (int i = 0; i < 3; i++) {
-            g2.addEdge("g2a_cycle_" + i, cycle2a[i], cycle2a[(i + 1) % 3]);
-        }
-
-        // Second C3 + Gadgets
-        for (int i = 0; i < 3; i++) {
-            String cId = String.valueOf(i + 200);
-            String pId = String.valueOf(i + 210);
-            String lId = String.valueOf(i + 220);
-
-            cycle2b[i] = g2.addNode(cId);
-            cycle2b[i].setAttribute("ui.label", cId);
-            Node p2b = g2.addNode(pId);
-            Node l2b = g2.addNode(lId);
-            p2b.setAttribute("ui.label", pId);
-            l2b.setAttribute("ui.label", lId);
-
-            g2.addEdge("g2b_c" + i + "_p" + i, cycle2b[i], p2b);
-            g2.addEdge("g2b_p" + i + "_l" + i, p2b, l2b);
-        }
-        for (int i = 0; i < 3; i++) {
-            g2.addEdge("g2b_cycle_" + i, cycle2b[i], cycle2b[(i + 1) % 3]);
-        }
-
-        g2.setAttribute("ui.stylesheet", styleSheet);
-        for (Node node : g2) {
-            node.setAttribute("ui.class", "unmarked");
-        }
-        return g2;
-    }
-
-
-    /**
-     * Creates a simple cycle graph C4 (Square).
-     * Node IDs: 0, 1, 2, 3.
-     * @param graphId The ID for the Graph object.
-     * @return A C4 graph.
-     */
-    public static Graph createCycleC4(String graphId) {
-        Graph g = new SingleGraph(graphId);
+    public static Graph createPartialIso_G1_GridHandle() {
+        Graph g = new SingleGraph("G1_GridHandle");
+        // Grid nodes (H1)
         g.addNode("0").setAttribute("ui.label", "0");
         g.addNode("1").setAttribute("ui.label", "1");
         g.addNode("2").setAttribute("ui.label", "2");
         g.addNode("3").setAttribute("ui.label", "3");
+        // Handle nodes
+        g.addNode("4").setAttribute("ui.label", "4");
+        g.addNode("5").setAttribute("ui.label", "5");
+
+        // Grid edges (Cycle C4)
         g.addEdge("e01", "0", "1");
-        g.addEdge("e12", "1", "2");
-        g.addEdge("e23", "2", "3");
-        g.addEdge("e30", "3", "0");
-
-        g.setAttribute("ui.stylesheet", styleSheet);
-         for (Node node : g) {
-             node.setAttribute("ui.class", "unmarked");
-         }
-        return g;
-    }
-
-     /**
-     * Creates a simple path graph P4.
-     * Node IDs: 10, 11, 12, 13.
-     * @param graphId The ID for the Graph object.
-     * @return A P4 graph.
-     */
-    public static Graph createPathP4(String graphId) {
-        Graph g = new SingleGraph(graphId);
-        g.addNode("10").setAttribute("ui.label", "10");
-        g.addNode("11").setAttribute("ui.label", "11");
-        g.addNode("12").setAttribute("ui.label", "12");
-        g.addNode("13").setAttribute("ui.label", "13");
-        g.addEdge("e1011", "10", "11");
-        g.addEdge("e1112", "11", "12");
-        g.addEdge("e1213", "12", "13");
-
-        g.setAttribute("ui.stylesheet", styleSheet);
-        for (Node node : g) {
-             node.setAttribute("ui.class", "unmarked");
-         }
-        return g;
-    }
-
-    /**
-     * Creates the Prism graph (C3 x K2), a 3-regular graph on 6 vertices.
-     * Node IDs: 0, 1, 2 (first triangle), 3, 4, 5 (second triangle).
-     * @param graphId The ID for the Graph object.
-     * @return The Prism graph.
-     */
-    public static Graph createPrismGraph(String graphId) {
-        Graph g = new SingleGraph(graphId);
-        // Nodes
-        for(int i=0; i<6; i++) {
-            g.addNode(String.valueOf(i)).setAttribute("ui.label", String.valueOf(i));
-        }
-        // Triangle 1 edges
-        g.addEdge("e01", "0", "1");
-        g.addEdge("e12", "1", "2");
+        g.addEdge("e13", "1", "3");
+        g.addEdge("e32", "3", "2");
         g.addEdge("e20", "2", "0");
-        // Triangle 2 edges
-        g.addEdge("e34", "3", "4");
-        g.addEdge("e45", "4", "5");
-        g.addEdge("e53", "5", "3");
-        // Connecting edges
-        g.addEdge("e03", "0", "3");
+
+        // Handle edges
+        g.addEdge("e04", "0", "4");
         g.addEdge("e14", "1", "4");
-        g.addEdge("e25", "2", "5");
+        g.addEdge("e45", "4", "5"); // Node 5 is degree 1
 
         g.setAttribute("ui.stylesheet", styleSheet);
-         for (Node node : g) {
-             node.setAttribute("ui.class", "unmarked");
-         }
+        for (Node node : g) { node.setAttribute("ui.class", "unmarked"); }
         return g;
     }
 
     /**
-     * Creates the K3,3 graph, a 3-regular bipartite graph on 6 vertices.
-     * Node IDs: 10, 11, 12 (partition U), 13, 14, 15 (partition V).
-     * @param graphId The ID for the Graph object.
-     * @return The K3,3 graph.
+     * Creates Graph G2: A 2x2 grid base {0,1,2,3} with two "bridges"
+     * using nodes {4,5} connecting opposite pairs of grid nodes.
+     * Contains C4 subgraph {0,1,3,2}. Non-isomorphic to G1.
+     * @return G2 graph.
      */
-    public static Graph createK33Graph(String graphId) {
-        Graph g = new SingleGraph(graphId);
-        // Partition U
-        Node u1 = g.addNode("10"); u1.setAttribute("ui.label", "10");
-        Node u2 = g.addNode("11"); u2.setAttribute("ui.label", "11");
-        Node u3 = g.addNode("12"); u3.setAttribute("ui.label", "12");
-        // Partition V
-        Node v1 = g.addNode("13"); v1.setAttribute("ui.label", "13");
-        Node v2 = g.addNode("14"); v2.setAttribute("ui.label", "14");
-        Node v3 = g.addNode("15"); v3.setAttribute("ui.label", "15");
+    public static Graph createPartialIso_G2_GridBridges() {
+        Graph g = new SingleGraph("G2_GridBridges");
+         // Grid nodes (H2)
+        g.addNode("0").setAttribute("ui.label", "0");
+        g.addNode("1").setAttribute("ui.label", "1");
+        g.addNode("2").setAttribute("ui.label", "2");
+        g.addNode("3").setAttribute("ui.label", "3");
+        // Bridge nodes
+        g.addNode("4").setAttribute("ui.label", "4");
+        g.addNode("5").setAttribute("ui.label", "5");
 
-        // Edges (all pairs between U and V)
-        g.addEdge("e1013", u1, v1); g.addEdge("e1014", u1, v2); g.addEdge("e1015", u1, v3);
-        g.addEdge("e1113", u2, v1); g.addEdge("e1114", u2, v2); g.addEdge("e1115", u2, v3);
-        g.addEdge("e1213", u3, v1); g.addEdge("e1214", u3, v2); g.addEdge("e1215", u3, v3);
+        // Grid edges (Cycle C4)
+        g.addEdge("e01", "0", "1");
+        g.addEdge("e13", "1", "3");
+        g.addEdge("e32", "3", "2");
+        g.addEdge("e20", "2", "0");
+
+        // Bridge edges
+        g.addEdge("e04", "0", "4"); // Bridge 1 attaches to 0, 2
+        g.addEdge("e24", "2", "4");
+        g.addEdge("e15", "1", "5"); // Bridge 2 attaches to 1, 3
+        g.addEdge("e35", "3", "5");
 
         g.setAttribute("ui.stylesheet", styleSheet);
-         for (Node node : g) {
-             node.setAttribute("ui.class", "unmarked");
-         }
+        for (Node node : g) { node.setAttribute("ui.class", "unmarked"); }
         return g;
     }
 
-     /**
-     * Creates a simple Star graph K1,3 (center connected to 3 leaves).
-     * Node IDs: 20 (center), 21, 22, 23 (leaves).
-     * @param graphId The ID for the Graph object.
-     * @return A K1,3 graph.
-     */
-    public static Graph createStarK13(String graphId) {
-        Graph g = new SingleGraph(graphId);
-        Node center = g.addNode("20"); center.setAttribute("ui.label", "20");
-        Node l1 = g.addNode("21"); l1.setAttribute("ui.label", "21");
-        Node l2 = g.addNode("22"); l2.setAttribute("ui.label", "22");
-        Node l3 = g.addNode("23"); l3.setAttribute("ui.label", "23");
+    // --- Pair 5: Structures attached to a K4 Clique ---
+    // H1/H2: Subgraph induced by nodes {0, 1, 2, 3} forming a K4 clique.
 
-        g.addEdge("e2021", center, l1);
-        g.addEdge("e2022", center, l2);
-        g.addEdge("e2023", center, l3);
+    /**
+     * Creates Graph G1: A K4 clique {0,1,2,3} with a P2 path {4,5}
+     * where node 4 connects to both nodes 0 and 1 of the K4.
+     * Contains K4 subgraph {0,1,2,3}.
+     * @return G1 graph.
+     */
+    public static Graph createPartialIso_G1_K4Handle() {
+        Graph g = new SingleGraph("G1_K4Handle");
+        Node[] k4nodes = new Node[4];
+        for (int i = 0; i < 4; i++) {
+            k4nodes[i] = g.addNode(String.valueOf(i));
+            k4nodes[i].setAttribute("ui.label", String.valueOf(i));
+        }
+        // K4 edges (H1)
+        for (int i = 0; i < 4; i++) {
+            for (int j = i + 1; j < 4; j++) {
+                g.addEdge("k4_" + i + "_" + j, k4nodes[i], k4nodes[j]);
+            }
+        }
+        // Handle nodes
+        Node n4 = g.addNode("4"); n4.setAttribute("ui.label", "4");
+        Node n5 = g.addNode("5"); n5.setAttribute("ui.label", "5");
+        // Handle edges
+        g.addEdge("e04", k4nodes[0], n4); // Node 4 connects to K4 nodes 0 and 1
+        g.addEdge("e14", k4nodes[1], n4);
+        g.addEdge("e45", n4, n5); // Path P2 attached via node 4
 
         g.setAttribute("ui.stylesheet", styleSheet);
-        for (Node node : g) {
-             node.setAttribute("ui.class", "unmarked");
-         }
+        for (Node node : g) { node.setAttribute("ui.class", "unmarked"); }
+        return g;
+    }
+
+    /**
+     * Creates Graph G2: A K4 clique {0,1,2,3} with two separate P1 paths ("stubs")
+     * attached to nodes 0 and 1 respectively.
+     * Contains K4 subgraph {0,1,2,3}. Non-isomorphic to G1.
+     * @return G2 graph.
+     */
+    public static Graph createPartialIso_G2_K4Stubs() {
+        Graph g = new SingleGraph("G2_K4Stubs");
+        Node[] k4nodes = new Node[4];
+        for (int i = 0; i < 4; i++) {
+            k4nodes[i] = g.addNode(String.valueOf(i));
+            k4nodes[i].setAttribute("ui.label", String.valueOf(i));
+        }
+        // K4 edges (H2)
+        for (int i = 0; i < 4; i++) {
+            for (int j = i + 1; j < 4; j++) {
+                g.addEdge("k4_" + i + "_" + j, k4nodes[i], k4nodes[j]);
+            }
+        }
+        // Stub nodes
+        Node n4 = g.addNode("4"); n4.setAttribute("ui.label", "4");
+        Node n5 = g.addNode("5"); n5.setAttribute("ui.label", "5");
+        // Stub edges
+        g.addEdge("e04", k4nodes[0], n4); // Stub 1 attached to K4 node 0
+        g.addEdge("e15", k4nodes[1], n5); // Stub 2 attached to K4 node 1
+
+        g.setAttribute("ui.stylesheet", styleSheet);
+        for (Node node : g) { node.setAttribute("ui.class", "unmarked"); }
+        return g;
+    }
+
+    // --- Pair 6: Bridged Disjoint Triangles ---
+    // H1/H2: Two disjoint C3 triangles {0,1,2} and {3,4,5}.
+
+    /**
+     * Creates Graph G1: Two disjoint C3 triangles bridged by edges (0,3) and (1,4).
+     * Contains two C3s {0,1,2} and {3,4,5} as subgraphs.
+     * @return G1 graph.
+     */
+    public static Graph createPartialIso_G1_BridgeC3_V1() {
+        Graph g = new SingleGraph("G1_BridgeC3_V1");
+        // Triangle 1 nodes
+        g.addNode("0").setAttribute("ui.label", "0");
+        g.addNode("1").setAttribute("ui.label", "1");
+        g.addNode("2").setAttribute("ui.label", "2");
+        // Triangle 2 nodes
+        g.addNode("3").setAttribute("ui.label", "3");
+        g.addNode("4").setAttribute("ui.label", "4");
+        g.addNode("5").setAttribute("ui.label", "5");
+
+        // Triangle 1 edges
+        g.addEdge("e01", "0", "1"); g.addEdge("e12", "1", "2"); g.addEdge("e20", "2", "0");
+        // Triangle 2 edges
+        g.addEdge("e34", "3", "4"); g.addEdge("e45", "4", "5"); g.addEdge("e53", "5", "3");
+
+        // Bridge edges V1
+        g.addEdge("b03", "0", "3");
+        g.addEdge("b14", "1", "4");
+
+        g.setAttribute("ui.stylesheet", styleSheet);
+        for (Node node : g) { node.setAttribute("ui.class", "unmarked"); }
+        return g;
+    }
+
+    /**
+     * Creates Graph G2: Two disjoint C3 triangles bridged differently by edges (0,3) and (0,4).
+     * Contains two C3s {0,1,2} and {3,4,5} as subgraphs. Non-isomorphic to G1.
+     * @return G2 graph.
+     */
+    public static Graph createPartialIso_G2_BridgeC3_V2() {
+        Graph g = new SingleGraph("G2_BridgeC3_V2");
+        // Triangle 1 nodes
+        g.addNode("0").setAttribute("ui.label", "0");
+        g.addNode("1").setAttribute("ui.label", "1");
+        g.addNode("2").setAttribute("ui.label", "2");
+        // Triangle 2 nodes
+        g.addNode("3").setAttribute("ui.label", "3");
+        g.addNode("4").setAttribute("ui.label", "4");
+        g.addNode("5").setAttribute("ui.label", "5");
+
+        // Triangle 1 edges
+        g.addEdge("e01", "0", "1"); g.addEdge("e12", "1", "2"); g.addEdge("e20", "2", "0");
+        // Triangle 2 edges
+        g.addEdge("e34", "3", "4"); g.addEdge("e45", "4", "5"); g.addEdge("e53", "5", "3");
+
+        // Bridge edges V2 (Node 0 connects to two nodes in the other triangle)
+        g.addEdge("b03", "0", "3");
+        g.addEdge("b04", "0", "4"); // Different bridge
+
+        g.setAttribute("ui.stylesheet", styleSheet);
+        for (Node node : g) { node.setAttribute("ui.class", "unmarked"); }
         return g;
     }
 
 
      // Example of how to use these:
-    //  public static void main(String[] args) {
-    //      System.setProperty("org.graphstream.ui", "swing");
+     public static void main(String[] args) {
+         System.setProperty("org.graphstream.ui", "swing");
 
-    //      Graph cfi1 = createCFI_G1();
-    //      Graph cfi2 = createCFI_G2();
-    //      System.out.println("Created CFI G1 (Nodes: " + cfi1.getNodeCount() + ", Edges: " + cfi1.getEdgeCount() + ")");
-    //      System.out.println("Created CFI G2 (Nodes: " + cfi2.getNodeCount() + ", Edges: " + cfi2.getEdgeCount() + ")");
-    //      // cfi1.display();
-    //      // cfi2.display();
+         // Pair 4 Example
+         Graph g1_gridH = createPartialIso_G1_GridHandle();
+         Graph g2_gridB = createPartialIso_G2_GridBridges();
+         System.out.println("Created Pair 4: Grid+Handle (G1) and Grid+Bridges (G2), both contain C4 {0,1,2,3}");
+         // g1_gridH.display(false);
+         // g2_gridB.display();
 
+         // Pair 5 Example
+         Graph g1_k4H = createPartialIso_G1_K4Handle();
+         Graph g2_k4S = createPartialIso_G2_K4Stubs();
+         System.out.println("Created Pair 5: K4+Handle (G1) and K4+Stubs (G2), both contain K4 {0,1,2,3}");
+         // g1_k4H.display(false);
+         // g2_k4S.display();
 
-    //      Graph c4_1 = createCycleC4("IsoC4_1");
-    //      Graph c4_2 = createCycleC4("IsoC4_2"); // Isomorphic pair
-    //      System.out.println("Created two C4 graphs.");
-    //      // c4_1.display();
-    //      // c4_2.display();
-
-
-    //      Graph c4 = createCycleC4("NonIso_C4");
-    //      Graph p4 = createPathP4("NonIso_P4"); // Non-isomorphic pair
-    //      System.out.println("Created C4 and P4 graphs.");
-    //      // c4.display();
-    //      // p4.display();
-
-
-    //      Graph prism = createPrismGraph("RegNonIso_Prism");
-    //      Graph k33 = createK33Graph("RegNonIso_K33"); // Regular non-isomorphic pair
-    //      System.out.println("Created Prism and K3,3 graphs.");
-    //      prism.display(false); // Keep window open
-    //      k33.display();
-
-    //      Graph tree1 = createPathP4("Tree_P4");
-    //      Graph tree2 = createStarK13("Tree_K13"); // Non-isomorphic trees (4 nodes each)
-    //      System.out.println("Created P4 and K1,3 tree graphs.");
-    //      // tree1.display();
-    //      // tree2.display();
-    //  }
+         // Pair 6 Example
+         Graph g1_bC3_1 = createPartialIso_G1_BridgeC3_V1();
+         Graph g2_bC3_2 = createPartialIso_G2_BridgeC3_V2();
+         System.out.println("Created Pair 6: Bridged C3s v1 (G1) and Bridged C3s v2 (G2), both contain 2 disjoint C3s");
+         g1_bC3_1.display(false); // Display last pair
+         g2_bC3_2.display();
+     }
 
 }
