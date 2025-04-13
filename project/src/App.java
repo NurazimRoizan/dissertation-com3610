@@ -45,6 +45,7 @@ public class App implements ViewerListener {
     protected ColourRefinementAlgorithm cRefineGraph;
     protected boolean cRefinementGoing = false;
     protected JLabel currentLabel, graphLabel1, graphLabel2, nodeInfoLabel, speedLabel;
+    protected JFrame frame;
     protected int sleepTime = 0;
     protected int maxNode = 5;
     //protected Generator gen = new BarabasiAlbertGenerator(1);
@@ -85,7 +86,7 @@ public class App implements ViewerListener {
         ViewPanel view = (ViewPanel) viewer.addDefaultView(false);
         ViewPanel view2 = (ViewPanel) viewer2.addDefaultView(false);
 
-        JFrame frame = new JFrame("Main Window");
+        frame = new JFrame("Main Window");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         dialog = new InitialDialog(frame); // Pass the frame as parent
         dialog.setVisible(true);
@@ -152,6 +153,7 @@ public class App implements ViewerListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dialog = new InitialDialog(frame);
+                dialog.setTitle("Pick other mode");
                 dialog.setVisible(true);
                 newGraphGenerator(3, graph);
                 newGraphGenerator(2, graph2);
@@ -629,11 +631,13 @@ public class App implements ViewerListener {
             crButton.setVisible(true);
             speedSpinner.setVisible(true);
             speedLabel.setVisible(true);
+            frame.setTitle("Colour Refinement");
         }else{
             startPebbleButton.setVisible(true);
             crButton.setVisible(false);
             speedSpinner.setVisible(false);
             speedLabel.setVisible(false);
+            frame.setTitle("Pebble Game");
         }
     }
 
