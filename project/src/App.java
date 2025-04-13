@@ -54,7 +54,7 @@ public class App implements ViewerListener {
     protected JToggleButton spoilerMark = new JToggleButton("Spoiler Move");
     protected JToggleButton duplicatorMark = new JToggleButton("Duplicator Move");
     protected PebbleGameState pebbleGame;
-    protected JButton startPebbleButton, crButton, backButton, nextButton;
+    protected JButton startPebbleButton, crButton, backButton, nextButton, welcomeButton;
     protected Map<String, Integer> finalColors;
     protected InitialDialog dialog;
     protected JSpinner speedSpinner;
@@ -146,6 +146,18 @@ public class App implements ViewerListener {
                 
             }
         });
+        welcomeButton = new JButton("<<");
+        welcomeButton.setToolTipText("Go back to welcome window");
+        welcomeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dialog = new InitialDialog(frame);
+                dialog.setVisible(true);
+                newGraphGenerator(3, graph);
+                newGraphGenerator(2, graph2);
+                resetEverything();
+            }
+        });
 
         startPebbleButton = new JButton("Start Pebble Game");
         startPebbleButton.addActionListener(new ActionListener() {
@@ -226,7 +238,7 @@ public class App implements ViewerListener {
         });
 
         panelVisibility(dialog.isOptionCRSelected());
-
+        buttonPanel.add(welcomeButton);
         buttonPanel.add(startPebbleButton);
         buttonPanel.add(spoilerMark);
         buttonPanel.add(duplicatorMark);
@@ -610,9 +622,13 @@ public class App implements ViewerListener {
     }
 
     public void panelVisibility(boolean flag){
+        backButton.setVisible(false);
+        nextButton.setVisible(false);
         if (dialog.isOptionCRSelected()){
             startPebbleButton.setVisible(false);
             crButton.setVisible(true);
+            speedSpinner.setVisible(true);
+            speedLabel.setVisible(true);
         }else{
             startPebbleButton.setVisible(true);
             crButton.setVisible(false);
