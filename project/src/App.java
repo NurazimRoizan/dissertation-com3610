@@ -44,22 +44,22 @@ public class App implements ViewerListener {
     protected boolean exploreGraph = false; //old
     protected ColourRefinementAlgorithm cRefineGraph;
     protected boolean cRefinementGoing = false;
-    protected JLabel currentLabel, graphLabel1, graphLabel2, nodeInfoLabel, speedLabel;
+    protected JLabel currentLabel, graphLabel1, graphLabel2, nodeInfoLabel, speedLabel, kPebbleLabel, nPebbleLabel;
     protected JFrame frame;
     protected int sleepTime = 0;
     protected int maxNode = 5;
-    //protected Generator gen = new BarabasiAlbertGenerator(1);
     protected ViewerPipe fromViewer; 
     protected boolean pebbleStarted = false;
     protected Node firstPebble;
     protected JToggleButton spoilerMark = new JToggleButton("Spoiler Move");
     protected JToggleButton duplicatorMark = new JToggleButton("Duplicator Move");
     protected PebbleGameState pebbleGame;
-    protected JButton startPebbleButton, crButton, backButton, nextButton, welcomeButton;
+    protected JButton startPebbleButton, crButton, backButton, nextButton, welcomeButton, pebbleRuleDialogButton;
     protected Map<String, Integer> finalColors;
     protected InitialDialog dialog;
-    protected JSpinner speedSpinner;
-    public static final String FINAL_COLOR_ATTR = "color_refinement.final_color"; // Public for easy access
+    protected JSpinner speedSpinner, pebbleKSpinner, pebbleNSpinner;
+    protected int pebbleK = 2; protected int pebbleN = 5;
+    public static final String FINAL_COLOR_ATTR = "color_refinement.final_color";
 
 
     public static void main(String args[]) {
@@ -170,7 +170,7 @@ public class App implements ViewerListener {
                 nodeInfoLabel.setText("Round 1 : Spoiler Turn");
                 colourMode = "spoiler";
                 pebbleStarted = true;
-                pebbleGame = new PebbleGameState(graph, graph2, 4, 5);
+                pebbleGame = new PebbleGameState(graph, graph2, pebbleK, pebbleN);
             }
         });
 
@@ -238,6 +238,41 @@ public class App implements ViewerListener {
 
             }
         });
+        pebbleRuleDialogButton = new JButton("Game Rules");
+        pebbleRuleDialogButton.setVisible(false);
+        pebbleRuleDialogButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                PebbleGameRulesDialog gameRuleDialog = new PebbleGameRulesDialog(frame);
+                gameRuleDialog.setVisible(true);
+            }
+        });
+        kPebbleLabel = new JLabel("k-Pebble :");
+        SpinnerNumberModel modelKPebble = new SpinnerNumberModel(2, 1, 20, 1);
+        pebbleKSpinner = new JSpinner(modelKPebble);
+        pebbleKSpinner.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                int k = (int) pebbleKSpinner.getValue();
+                System.out.println("Updated k-Pebble: " + k);
+                pebbleK = k;
+                if (pebbleStarted) {
+                    pebbleGame.updateKPebble(k);
+                }
+            }
+        });
+        nPebbleLabel = new JLabel("n-Round :");
+        SpinnerNumberModel modelNPebble = new SpinnerNumberModel(5, 1, 20, 1);
+        pebbleNSpinner = new JSpinner(modelNPebble);
+        pebbleNSpinner.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                int n = (int) pebbleNSpinner.getValue();
+                System.out.println("Updated Game Round: " + n);
+                pebbleN = n;
+                if (pebbleStarted) {
+                    pebbleGame.updateNPebble(n);
+                }
+            }
+        });
 
         panelVisibility(dialog.isOptionCRSelected());
         buttonPanel.add(welcomeButton);
@@ -250,6 +285,11 @@ public class App implements ViewerListener {
         buttonPanel.add(resetOption);
         buttonPanel.add(speedLabel);
         buttonPanel.add(speedSpinner);
+        buttonPanel.add(kPebbleLabel);
+        buttonPanel.add(pebbleKSpinner);
+        buttonPanel.add(nPebbleLabel);
+        buttonPanel.add(pebbleNSpinner);
+        buttonPanel.add(pebbleRuleDialogButton);
 
         bottomPanel.add(nodeInfoLabel);
         bottomPanel.add(buttonPanel);
@@ -632,12 +672,22 @@ public class App implements ViewerListener {
             speedSpinner.setVisible(true);
             speedLabel.setVisible(true);
             frame.setTitle("Colour Refinement");
+            pebbleRuleDialogButton.setVisible(false);
+            pebbleKSpinner.setVisible(false);
+            pebbleNSpinner.setVisible(false);
+            kPebbleLabel.setVisible(false);
+            nPebbleLabel.setVisible(false);
         }else{
             startPebbleButton.setVisible(true);
             crButton.setVisible(false);
             speedSpinner.setVisible(false);
             speedLabel.setVisible(false);
             frame.setTitle("Pebble Game");
+            pebbleRuleDialogButton.setVisible(true);
+            pebbleKSpinner.setVisible(true);
+            pebbleNSpinner.setVisible(true);
+            kPebbleLabel.setVisible(true);
+            nPebbleLabel.setVisible(true);
         }
     }
 

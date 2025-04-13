@@ -177,4 +177,12 @@ public class PebbleGameState {
     public List<Node> getPebblesG2() {
         return pebblesG2;
     }
+
+    public void updateKPebble(int k){
+        maxPebble = k;
+    }
+
+    public void updateNPebble(int n){
+        maxRound = n;
+    }
 }
