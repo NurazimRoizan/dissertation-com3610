@@ -44,7 +44,7 @@ public class App implements ViewerListener {
     protected boolean exploreGraph = false; //old
     protected ColourRefinementAlgorithm cRefineGraph;
     protected boolean cRefinementGoing = false;
-    protected JLabel currentLabel, graphLabel1, graphLabel2, nodeInfoLabel;
+    protected JLabel currentLabel, graphLabel1, graphLabel2, nodeInfoLabel, speedLabel;
     protected int sleepTime = 0;
     protected int maxNode = 5;
     //protected Generator gen = new BarabasiAlbertGenerator(1);
@@ -54,8 +54,10 @@ public class App implements ViewerListener {
     protected JToggleButton spoilerMark = new JToggleButton("Spoiler Move");
     protected JToggleButton duplicatorMark = new JToggleButton("Duplicator Move");
     protected PebbleGameState pebbleGame;
-    protected JButton startPebbleButton;
+    protected JButton startPebbleButton, crButton, backButton, nextButton;
     protected Map<String, Integer> finalColors;
+    protected InitialDialog dialog;
+    protected JSpinner speedSpinner;
     public static final String FINAL_COLOR_ATTR = "color_refinement.final_color"; // Public for easy access
 
 
@@ -85,11 +87,14 @@ public class App implements ViewerListener {
 
         JFrame frame = new JFrame("Main Window");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        dialog = new InitialDialog(frame); // Pass the frame as parent
+        dialog.setVisible(true);
 
         JPanel headerPanel = new JPanel(new GridLayout(1, 2));
         JPanel bottomPanel = new JPanel(new GridLayout(2, 1));
         JPanel buttonPanel = new JPanel(new FlowLayout());
         JPanel centerPanel = new JPanel(new GridLayout(1, 2));
+        speedLabel = new JLabel("Animation Delay: "); // Create the label
         graphLabel1 = new JLabel("Graph A", SwingConstants.CENTER);
         graphLabel2 = new JLabel("Graph B", SwingConstants.CENTER);
         nodeInfoLabel = new JLabel("Click a node to get detailed attributes . . .", SwingConstants.CENTER);
@@ -151,25 +156,27 @@ public class App implements ViewerListener {
                 nodeInfoLabel.setText("Round 1 : Spoiler Turn");
                 colourMode = "spoiler";
                 pebbleStarted = true;
-                pebbleGame = new PebbleGameState(graph, graph2, 2, 5);
+                pebbleGame = new PebbleGameState(graph, graph2, 4, 5);
             }
         });
 
-        JButton myButton3 = new JButton("Colour Refinement");
-        myButton3.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, Color.YELLOW, Color.ORANGE, Color.RED, Color.BLUE), emptyBorder));
+        crButton = new JButton("Colour Refinement");
+        crButton.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, Color.YELLOW, Color.ORANGE, Color.RED, Color.BLUE), emptyBorder));
 
-        myButton3.addActionListener(new ActionListener() {
+        crButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Starting Algorithm . . .");
                 cRefineGraph = new ColourRefinementAlgorithm(graphLabel1, graph, graphLabel2, graph2 ,sleepTime);
                 cRefineGraph.setCRefinementGoing(true);
+                backButton.setVisible(true);
+                nextButton.setVisible(true);
                 //finalColors = ColorRefinement.refine(graph, graph2, true);
             }
         });
-        JButton myButton5 = new JButton("Back Iteration");
-        //myButton5.setVisible(false);
-        myButton5.addActionListener(new ActionListener() {
+        backButton = new JButton("Back Iteration");
+        backButton.setVisible(false);
+        backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Moving back in time . . .");
@@ -182,9 +189,9 @@ public class App implements ViewerListener {
             }
         });
 
-        JButton myButton4 = new JButton("Next Iteration");
-        //myButton4.setVisible(false);
-        myButton4.addActionListener(new ActionListener() {
+        nextButton = new JButton("Next Iteration");
+        nextButton.setVisible(false);
+        nextButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Going forward in time . . .");
@@ -207,7 +214,7 @@ public class App implements ViewerListener {
         });
 
         SpinnerNumberModel model = new SpinnerNumberModel(0, 0, 100, 10);
-        JSpinner speedSpinner = new JSpinner(model);
+        speedSpinner = new JSpinner(model);
 
         speedSpinner.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
@@ -218,14 +225,15 @@ public class App implements ViewerListener {
             }
         });
 
+        panelVisibility(dialog.isOptionCRSelected());
+
         buttonPanel.add(startPebbleButton);
         buttonPanel.add(spoilerMark);
         buttonPanel.add(duplicatorMark);
-        buttonPanel.add(myButton3);
-        buttonPanel.add(myButton5);
-        buttonPanel.add(myButton4);
+        buttonPanel.add(crButton);
+        buttonPanel.add(backButton);
+        buttonPanel.add(nextButton);
         buttonPanel.add(resetOption);
-        JLabel speedLabel = new JLabel("Animation Delay: "); // Create the label
         buttonPanel.add(speedLabel);
         buttonPanel.add(speedSpinner);
 
@@ -301,43 +309,9 @@ public class App implements ViewerListener {
                     }else{cRefineGraph.cRefinement(graph, graph2);}  
                 }
             }
-            //==============Test new CR algo-------------------
-            if (finalColors != null) {
-                System.out.println("\nFinal Colors Map (NodeID -> Color):");
-                finalColors.forEach((nodeId, color) ->
-                    System.out.println("  Node " + nodeId + ": Color " + color)
-                );
-    
-                // Assign colors visually for display using a predefined color palette
-                String[] uiColors = {"blue", "red", "green", "yellow", "purple", "orange", "pink", "cyan", "magenta", "gray", "brown", "lime"};
-                graph.nodes().forEach(n -> {
-                     Object colorAttr = n.getAttribute(FINAL_COLOR_ATTR);
-                     if (colorAttr instanceof Integer) {
-                         int colorIndex = (Integer) colorAttr;
-                         String colorString = uiColors[Math.abs(colorIndex) % uiColors.length]; // Use modulo and abs
-                         n.setAttribute("ui.style", "fill-color: " + colorString + "; size: 20px; text-size: 16px;");
-                         n.setAttribute("ui.label", n.getId() + " [" + colorIndex + "]"); // Show color in label
-                     } else {
-                         n.setAttribute("ui.label", n.getId() + " [NoColor]");
-                     }
-    
-                });
-                 graph2.nodes().forEach(n -> {
-                    Object colorAttr = n.getAttribute(FINAL_COLOR_ATTR);
-                     if (colorAttr instanceof Integer) {
-                         int colorIndex = (Integer) colorAttr;
-                         String colorString = uiColors[Math.abs(colorIndex) % uiColors.length]; // Use modulo and abs
-                         n.setAttribute("ui.style", "fill-color: " + colorString + "; size: 20px; text-size: 16px;");
-                         n.setAttribute("ui.label", n.getId() + " [" + colorIndex + "]"); // Show color in label
-                      } else {
-                         n.setAttribute("ui.label", n.getId() + " [NoColor]");
-                     }
-                });
-            }
         }
-
-        
     }
+
 
     public void viewClosed(String id) {
 		loop = false;
@@ -491,6 +465,7 @@ public class App implements ViewerListener {
         startPebbleButton.setEnabled(true);
         graphLabel1.setText("Graph A");
         graphLabel2.setText("Graph B");
+        panelVisibility(dialog.isOptionCRSelected());
 
     }
 
@@ -632,6 +607,18 @@ public class App implements ViewerListener {
         resetDialog.pack(); // Adjust dialog size to fit components
         resetDialog.setLocationRelativeTo(parentFrame); // Center relative to the parent
         resetDialog.setVisible(true);
+    }
+
+    public void panelVisibility(boolean flag){
+        if (dialog.isOptionCRSelected()){
+            startPebbleButton.setVisible(false);
+            crButton.setVisible(true);
+        }else{
+            startPebbleButton.setVisible(true);
+            crButton.setVisible(false);
+            speedSpinner.setVisible(false);
+            speedLabel.setVisible(false);
+        }
     }
 
 }

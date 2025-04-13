@@ -319,30 +319,4 @@ public class TestGraphManager{
     }
 
 
-     // Example of how to use these:
-     public static void main(String[] args) {
-         System.setProperty("org.graphstream.ui", "swing");
-
-         // Pair 4 Example
-         Graph g1_gridH = createPartialIso_G1_GridHandle();
-         Graph g2_gridB = createPartialIso_G2_GridBridges();
-         System.out.println("Created Pair 4: Grid+Handle (G1) and Grid+Bridges (G2), both contain C4 {0,1,2,3}");
-         // g1_gridH.display(false);
-         // g2_gridB.display();
-
-         // Pair 5 Example
-         Graph g1_k4H = createPartialIso_G1_K4Handle();
-         Graph g2_k4S = createPartialIso_G2_K4Stubs();
-         System.out.println("Created Pair 5: K4+Handle (G1) and K4+Stubs (G2), both contain K4 {0,1,2,3}");
-         // g1_k4H.display(false);
-         // g2_k4S.display();
-
-         // Pair 6 Example
-         Graph g1_bC3_1 = createPartialIso_G1_BridgeC3_V1();
-         Graph g2_bC3_2 = createPartialIso_G2_BridgeC3_V2();
-         System.out.println("Created Pair 6: Bridged C3s v1 (G1) and Bridged C3s v2 (G2), both contain 2 disjoint C3s");
-         g1_bC3_1.display(false); // Display last pair
-         g2_bC3_2.display();
-     }
-
 }
