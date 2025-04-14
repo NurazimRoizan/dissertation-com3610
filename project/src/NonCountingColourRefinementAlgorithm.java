@@ -1,307 +1,249 @@
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List; // Import List
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.swing.JLabel;
+import org.graphstream.graph.*;
+import org.graphstream.graph.implementations.*;
+import org.graphstream.ui.swing_viewer.SwingViewer; // Correct import
+import org.graphstream.ui.swing_viewer.ViewPanel; // Correct import
+import org.graphstream.ui.view.Viewer; // Correct import
 
-import org.graphstream.algorithm.APSP;
-import org.graphstream.algorithm.Centroid;
-import org.graphstream.graph.Graph;
-import org.graphstream.graph.Node;
+public class NonCountingColourRefinementAlgorithm extends JFrame {
 
-public class NonCountingColourRefinementAlgorithm {
-    private Map<String, Integer> colourTable;
-    private Graph graph1, graph2;
-    private int colourIndex;
-    private boolean colorChanges;
-    private boolean startIteration; // Or manage this externally
-    private boolean cRefinementGoing;
-    private JLabel roundTitle1, roundTitle2;
-    private int round, stableRound;
-    private int previousSize;
-    private int sleep;
-    private int currentColourIndex = -1;
+    private Graph graph;
+    private ViewPanel viewPanel;
+    private Viewer viewer;
+    private int iterationCount = 0;
+    private boolean refinementComplete = false;
 
-    public NonCountingColourRefinementAlgorithm(JLabel roundTitle1, Graph graph1,JLabel roundTitle2, Graph graph2, int sleep) {
-        this.colourTable = new HashMap<>(); // Initialize the map
-        this.colourIndex = 0;
-        this.colorChanges = false; // Initialize
-        this.startIteration = true; // or false
-        this.cRefinementGoing=false;
-        this.roundTitle1 = roundTitle1;
-        this.roundTitle2 = roundTitle2;
-        this.round = 1;
-        this.previousSize = 0;
-        this.sleep = sleep;
-        this.graph1 = graph1;
-        this.graph2 = graph2;
-    }
+    // Define a color palette for visualization
+    private static final List<String> COLOR_PALETTE = List.of(
+            "red", "blue", "green", "yellow", "orange", "purple", "cyan", "magenta",
+            "lime", "pink", "teal", "lavender", "brown", "beige", "maroon", "olive"
+            // Add more colors if needed
+    );
 
-    public void cRefinement(Graph graph, Node startNode){
-        if (graph.equals(this.graph1)) {
-            Node startNode2 = computeCentroid(graph2);
-            cRefinement(graph1, startNode, graph2, startNode2);
-        }else{
-            Node startNode1 = computeCentroid(graph1);
-            cRefinement(graph1, startNode1, graph2, startNode);
-        }
-    }
+    // Record to represent the signature for partitioning
+    // Includes current color, sorted neighbor colors, sorted non-neighbor colors
+    private record NodeSignature(int currentColor, Set<Integer> neighborColors, Set<Integer> nonNeighborColors) {}
 
-    public void cRefinement(Graph graph){
-        Node startNode = computeCentroid(graph);
-        cRefinement(graph, startNode);
-    }
+    public NonCountingColourRefinementAlgorithm() {
+        super("Color Refinement Variant (Neighbors & Non-Neighbors)");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(800, 600);
+        setLocationRelativeTo(null); // Center the window
 
-    public void cRefinement(Graph graph1, Graph graph2){
-        Node startNode1 = computeCentroid(graph1);
-        Node startNode2 = computeCentroid(graph2);
-        cRefinement(graph1, startNode1, graph2, startNode2);
-    }
+        // --- Graph Setup ---
+        System.setProperty("org.graphstream.ui", "swing"); // Use Swing UI
+        graph = new SingleGraph("ColorRefinementGraph");
+        createExampleGraph(); // Populate the graph
+        initializeNodeColorsByDegree();
+        //initializeNodeColors(); // Set initial color (e.g., 0 for all)
 
-    public void cRefinement(Graph graph1, Node nodeGraph1, Graph graph2, Node nodeGraph2){
-        if (startIteration) {startup(nodeGraph1, nodeGraph2);}
-        if (colorChanges){
-            System.out.println("There is color changes. Starting new round . . .");
-            round += 1;
-            colourTable.clear();
-            colourIndex = 0;
-            //int currentColourIndex = -1;
-            nextRound(nodeGraph1, nodeGraph2);
-        } else {
-            System.out.println("Algorithm now stable");
-            cRefinementGoing = false;
-            System.out.println("End of Colour Refinement");
-            this.stableRound = round;
-            startIteration = true;
-            System.out.println(getColourTable());
-        }
-    }
+        // --- GraphStream Viewer Setup ---
+        viewer = new SwingViewer(graph, Viewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
+        viewer.enableAutoLayout(); // Enable layout algorithm
+        viewPanel = (ViewPanel) viewer.addDefaultView(false); // false means no JFrame wrapper
+        viewPanel.setPreferredSize(new Dimension(600, 500));
 
-    public void startup(Node source) {
-        // Iterator<? extends Node> k = source.getDepthFirstIterator();
-        // Iterator<? extends Node> j = source.getDepthFirstIterator();
-        Iterator<? extends Node> k = source.getBreadthFirstIterator();
-        Iterator<? extends Node> j = source.getBreadthFirstIterator();
-        int degree = source.getDegree();
-    
-        // Check Neighbour Nodes
-        while (k.hasNext()) {
-            Node next = k.next();
-            degree = next.getDegree();
-            
-            if (degree >= 0){ // if the node has at least one neighbours
-                if (colourTable.containsKey(String.valueOf(degree))){
-                    if (next.hasAttribute("mark")){next.setAttribute("ui.class", "colour", next.getAttribute("mark"));
-                    }else {
-                        next.setAttribute("ui.class", "colour");
-                    }
-                }else {
-                    colourTable.put(String.valueOf(degree), colourIndex);
-                    if (next.hasAttribute("mark")){next.setAttribute("ui.class", "colour", next.getAttribute("mark"));
-                    }else {
-                        next.setAttribute("ui.class", "colour");
-                    }
-                    colourIndex += 1;
-                    colorChanges = true;
-                    
+        // --- Control Panel ---
+        JPanel controlPanel = new JPanel();
+        JButton stepButton = new JButton("Refine Step");
+        JButton runAllButton = new JButton("Run Full Refinement");
+        JLabel statusLabel = new JLabel("Iteration: 0. Initial state.");
+
+        stepButton.addActionListener(e -> {
+            if (!refinementComplete) {
+                boolean changed = refineStep();
+                iterationCount++;
+                if (!changed) {
+                    refinementComplete = true;
+                    statusLabel.setText("Iteration: " + iterationCount + ". Stable state reached.");
+                    stepButton.setEnabled(false);
+                    runAllButton.setEnabled(false);
+                } else {
+                    statusLabel.setText("Iteration: " + iterationCount + ". Colors refined.");
                 }
-            } else {next.setAttribute("ui.class", "colour0"); }
-        }
-        System.out.println("Assigned colour attribute to the nodes");
-        
-        // Colour the nodes
-        while(j.hasNext()){
-            Node next = j.next();
-            degree = next.getDegree();
-            double div = 1/(double)(colourTable.size()-1);
-            if (colourTable.containsKey(String.valueOf(degree))){
-                currentColourIndex = colourTable.get(String.valueOf(degree)); 
-                next.setAttribute("ui.color", (float)(div*currentColourIndex));
-                //String addString = String.valueOf(next.getAttribute("signature"));
-                next.setAttribute("signature1", String.valueOf(degree));
             }
-            //System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
-            sleep(sleep);
-        }
-        startIteration = false;
-        roundTitle1.setText("Round " + round);
-        roundTitle2.setText("Round " + round);
-        System.out.println("End of 1st iteration");
-    }
-
-    public void startup(Node source1, Node source2) {
-        startup(source1);
-        startup(source2);
-    }
-
-    public void nextRound(Node source) {
-        Iterator<? extends Node> k = source.getBreadthFirstIterator();
-        Iterator<? extends Node> j = source.getBreadthFirstIterator();
-        Iterator<? extends Node> i = source.getBreadthFirstIterator();
-        // Iterator<? extends Node> k = source.getDepthFirstIterator();
-        // Iterator<? extends Node> j = source.getDepthFirstIterator();
-        // Iterator<? extends Node> i = source.getDepthFirstIterator();
-
-        //colorChanges = false;
-
-        // Update each node with signature attribute
-        System.out.println("Updating signature for round " + round);
-        while (i.hasNext()){
-            Node next = i.next();
-            updateSignature(next);
-        }
-
-        // - rest of the node
-        while (k.hasNext()) {
-            Node next = k.next();
-            String currentSignature = String.valueOf(next.getAttribute("signature"+(round)));
-            
-            if (currentSignature != null && !colourTable.containsKey(currentSignature)) {
-                colourTable.put(currentSignature, colourIndex++);
-            }
-        }
-        System.out.println("Assigned signature attribute to the nodes");
-        
-        // Colour the nodes
-        System.out.println("Colouring the nodes");
-        while(j.hasNext()){
-            Node next = j.next();
-            String currentSignature = String.valueOf(next.getAttribute("signature"+(round)));
-            double div = 1/(double)(colourTable.size()-1);
-            currentColourIndex = colourTable.get(currentSignature);     
-            next.setAttribute("ui.color", (float)(div*currentColourIndex));
-            //for debugging
-            //System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
-            sleep(sleep);
-        }
-        System.out.println("previousSize= "+ previousSize + "and currentSize= " + colourTable.size());
-
-        if (previousSize < colourTable.size()){
-            colorChanges = true;
-            previousSize = colourTable.size();
-            roundTitle1.setText("Round " + round);
-            roundTitle2.setText("Round " + round);
-        }
-
-        System.out.println("End of Round "+ round);
-    }
-
-    public void nextRound(Node source1, Node source2) {
-        colorChanges = false;
-        nextRound(source1);
-        nextRound(source2);
-    }
-
-    public void updateSignature(Node source){
-        Stream<Node> neighbourNodes = source.neighborNodes();
-        String currentSignature = String.valueOf(source.getAttribute("signature"+(round-1)));
-        String currentDegree = currentSignature.substring(0,1);
-        StringBuilder neighbourSignature = new StringBuilder();
-        if (source.hasAttribute("mark")){neighbourSignature.append("p");}
-        neighbourNodes.forEach(neighbourNode -> {
-            neighbourSignature.append(String.valueOf(neighbourNode.getAttribute("signature"+(round-1))));
-            //System.out.println("Neighbor color signature: " + neighbourSignature);
-            //System.out.println("Current Signature: " + String.valueOf(currentDegree) + neighbourSignature);
         });
-        String sortedNeighbourSignature = createReverseSortedSignature(neighbourSignature.toString());
-        neighbourSignature.setLength(0);
+
+        runAllButton.addActionListener(e -> {
+            if (refinementComplete) return;
+
+            boolean changed = true;
+            while (changed && !refinementComplete) {
+                changed = refineStep();
+                iterationCount++;
+                 if (!changed) {
+                    refinementComplete = true;
+                 }
+                 // Small delay to allow visualization update (optional)
+                 try { Thread.sleep(100); } catch (InterruptedException ie) {Thread.currentThread().interrupt();}
+            }
+             statusLabel.setText("Iteration: " + iterationCount + ". Stable state reached.");
+             stepButton.setEnabled(false);
+             runAllButton.setEnabled(false);
+        });
+
+        controlPanel.add(stepButton);
+        controlPanel.add(runAllButton);
+        controlPanel.add(statusLabel);
+
+        // --- Layout ---
+        setLayout(new BorderLayout());
+        add(viewPanel, BorderLayout.CENTER);
+        add(controlPanel, BorderLayout.SOUTH);
+
+        // Initial display update
+        updateGraphAppearance();
+    }
+
+    private void createExampleGraph() {
+        // Example: A simple graph (e.g., a path graph or a cycle)
+        graph.setStrict(false); // Allow auto-creation of nodes on edge add
+        graph.setAutoCreate(true);
+
+        // A small graph for demonstration
+        graph.addEdge("AB", "A", "B");
+        graph.addEdge("BC", "B", "C");
+        graph.addEdge("CD", "C", "D");
+        graph.addEdge("DE", "D", "E");
+        graph.addEdge("EF", "E", "F");
+        graph.addEdge("FA", "F", "A"); // Cycle A-B-C-D-E-F-A
+        graph.addEdge("AC", "A", "C"); // Chord
+        graph.addEdge("BD", "B", "D"); // Chord
+
+        // Add an isolated node
+        //graph.addNode("G");
+
+        // Basic styling
+        graph.setAttribute("ui.stylesheet", getStylesheet());
+    }
+
+     private String getStylesheet() {
+        return "node {" +
+               "   size: 15px;" +
+               "   fill-mode: plain;" +
+               "   text-size: 12;" +
+               "   text-alignment: above;" +
+               "   stroke-mode: plain;" +
+               "   stroke-color: black;" +
+               "   stroke-width: 1px;" +
+               "}" +
+               "edge {" +
+               "   size: 1px;" +
+               "   fill-color: grey;" +
+               "}";
+    }
+
+    /**
+     * Initializes node color classes based on their degree (number of neighbors).
+     */
+    private void initializeNodeColorsByDegree() {
+        System.out.println("Initializing node colors by degree...");
+        for (Node node : graph) {
+            int degree = node.getDegree();
+            node.setAttribute("color_class", degree); // Use degree as initial color
+            node.setAttribute("next_color_class", degree); // Initialize next color to the same
+            System.out.println("  Node " + node.getId() + ": Degree = " + degree);
+        }
+        iterationCount = 0;
+        refinementComplete = false;
+    }
+
+
+    private void initializeNodeColors() {
+        for (Node node : graph) {
+            node.setAttribute("color_class", 0); // Initial color class is 0
+            node.setAttribute("next_color_class", 0); // Initialize next color
+        }
+        iterationCount = 0;
+        refinementComplete = false;
+    }
+
+    private void updateGraphAppearance() {
+        for (Node node : graph) {
+            int colorClass = (int) node.getAttribute("color_class");
+            String colorName = COLOR_PALETTE.get(colorClass % COLOR_PALETTE.size());
+            node.setAttribute("ui.style", "fill-color: " + colorName + ";");
+            node.setAttribute("ui.label", node.getId() + " (" + colorClass + ")"); // Show node ID and color class
+        }
+    }
+
+    private boolean refineStep() {
+        Map<NodeSignature, Integer> signatureToNewColor = new HashMap<>();
+        Map<Node, NodeSignature> nodeSignatures = new HashMap<>();
+        int nextColorId = 0;
+        boolean colorsChanged = false;
         
-        source.setAttribute("signature"+(round), currentDegree + sortedNeighbourSignature);
-        //System.out.println("Done set for node= "+ source);
-    }
 
-    public static String createSortedSignature(String s) {
-        char[] chars = s.toCharArray();
-        Arrays.sort(chars);
-        return new String(chars);
-    }
+        // 1. Calculate Signature for each node
+        for (Node node : graph) {
+            int currentColor = (int) node.getAttribute("color_class");
 
-    public static String createReverseSortedSignature(String s) {
-        return s.chars()
-                .mapToObj(c -> (char) c)
-                .sorted(Comparator.reverseOrder())
-                .map(String::valueOf)
-                .collect(Collectors.joining());
-    }
+            // Get neighbor colors
+            Set<Integer> neighborColors = new TreeSet<>(); // Use TreeSet for canonical order
 
-    int currentCentroid = 0;
-    public Node computeCentroid(Graph graph){
-        APSP apsp = new APSP();
- 		apsp.init(graph);
- 		apsp.compute();
- 
- 		Centroid centroid = new Centroid();
- 		centroid.init(graph);
- 		centroid.compute();
-		graph.nodes().forEach( n -> {
- 			Boolean in = (Boolean) n.getAttribute("centroid");
- 			//System.out.printf("%s is%s in the centroid.\n", n.getId(), in ? "" : " not");
-            if (in){
-                currentCentroid = Integer.parseInt(n.getId());
+            Stream<Node> neighborIt = node.neighborNodes();
+            Set<Node> neighbours = new HashSet<>(); // Keep track of neighbors
+            neighborIt.forEach(neighbour -> {
+                neighborColors.add((Integer) neighbour.getAttribute("color_class"));
+                neighbours.add(neighbour);
+            });
+
+            Iterator<Node> allNodes = graph.iterator();// Get all nodes once
+            // Get non-neighbor colors
+            Set<Integer> nonNeighborColors = new TreeSet<>(); // Use TreeSet for canonical order
+            while(allNodes.hasNext()){
+                System.out.println("while =================");
+                Node otherNode = allNodes.next();
+                if (otherNode != node && !neighbours.contains(otherNode)) {
+                    nonNeighborColors.add((Integer) otherNode.getAttribute("color_class"));
+                    System.out.println("adding "+ otherNode.getId()+"into non neighbour");
+                }
             }
- 		});
-        return graph.getNode(currentCentroid);
-    }
 
-    public void setIteration(Graph graph, int desiredRound){
-        Node startNode = computeCentroid(graph);
-        Iterator<? extends Node> j = startNode.getBreadthFirstIterator();
-        Iterator<? extends Node> k = startNode.getBreadthFirstIterator();
-        colourTable.clear();
-        int colourIndex = 0;
-        int currentColourIndex = -1;
+            // Create the signature
+            NodeSignature signature = new NodeSignature(currentColor, neighborColors, nonNeighborColors);
+            nodeSignatures.put(node, signature);
+            System.out.println("Node " + node.getId() + " Sig: " + signature); // Debug print
+        }
 
-        while (k.hasNext()) {
-            Node next = k.next();
-            String currentSignature = String.valueOf(next.getAttribute("signature"+(desiredRound)));
-            
-            if (currentSignature != null && !colourTable.containsKey(currentSignature)) {
-                colourTable.put(currentSignature, colourIndex++);
+        // 2. Determine new color class based on signature
+        for (Node node : graph) {
+            NodeSignature signature = nodeSignatures.get(node);
+            if (!signatureToNewColor.containsKey(signature)) {
+                signatureToNewColor.put(signature, nextColorId++);
+            }
+            node.setAttribute("next_color_class", signatureToNewColor.get(signature));
+        }
+
+        // 3. Update colors and check if any changed
+        for (Node node : graph) {
+            int currentC = (int) node.getAttribute("color_class");
+            int nextC = (int) node.getAttribute("next_color_class");
+            if (currentC != nextC) {
+                colorsChanged = true;
+                node.setAttribute("color_class", nextC);
             }
         }
-        System.out.println("Assigned colorTable attribute to the nodes");
 
-        // Colour the nodes
-        System.out.println("Colouring the nodes");
+        // 4. Update visual appearance
+        updateGraphAppearance();
 
-        while(j.hasNext()){
-            Node next = j.next();
-            String currentSignature = String.valueOf(next.getAttribute("signature"+(desiredRound)));
-            double div = 1/(double)(colourTable.size()-1);
-            currentColourIndex = colourTable.get(currentSignature);     
-            next.setAttribute("ui.color", (float)(div*currentColourIndex));
-            //For debugging
-            //System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
-        }
-        System.out.println("current table size is " + colourTable.size());
-        System.out.println("Currently showing round number "+ desiredRound);
+        return colorsChanged;
     }
 
-    public void setCRefinementGoing(boolean onxon){
-        this.cRefinementGoing=onxon;
-    }
-    public boolean getCRefinementGoing(){
-        return this.cRefinementGoing;
-    }
-    public int getStableRound(){
-        return stableRound;
-    }
-
-    protected void sleep(int milisec) {
-        try { Thread.sleep(milisec); } catch (Exception e) {}
-    }
-
-    protected void resetState(){
-        this.colorChanges = false; 
-        this.startIteration = true; 
-        this.cRefinementGoing=false;
-    }
-
-    public String getColourTable(){
-        return colourTable.toString();
+    public static void main(String[] args) {
+        // Run the application on the Event Dispatch Thread (EDT)
+        SwingUtilities.invokeLater(() -> {
+            NonCountingColourRefinementAlgorithm app = new NonCountingColourRefinementAlgorithm();
+            app.setVisible(true);
+        });
     }
 }
