@@ -196,9 +196,13 @@ public class App implements ViewerListener {
                 System.out.println("Moving back in time . . .");
                 int previousRound = Integer.parseInt(currentLabel.getText().substring(currentLabel.getText().length()-1))-1;
                 if (previousRound > 0){
-                    cRefineGraph.setIteration(currentGraph, previousRound);
+                    cRefineGraph.setIteration(previousRound);
+                    cRefineGraph.setIteration(previousRound);
+                    System.out.println("setting on round " + previousRound);
+                    System.out.println("signature"+(previousRound));
                     System.out.println("======================== ");
-                    currentLabel.setText("Round " + previousRound);
+                    graphLabel1.setText("Round " + previousRound);
+                    graphLabel2.setText("Round " + previousRound);
                 }
             }
         });
@@ -211,9 +215,12 @@ public class App implements ViewerListener {
                 System.out.println("Going forward in time . . .");
                 int nextRound = Integer.parseInt(currentLabel.getText().substring(currentLabel.getText().length()-1))+1;
                 if (cRefineGraph.getStableRound()>nextRound){
-                    cRefineGraph.setIteration(currentGraph, nextRound);
-                    System.out.println("======================== ");
-                    currentLabel.setText("Round " + nextRound);
+                    cRefineGraph.setIteration(nextRound);
+                    cRefineGraph.setIteration(nextRound);
+                System.out.println("setting on round " + nextRound);
+                System.out.println("======================== ");
+                    graphLabel1.setText("Round " + nextRound);
+                    graphLabel2.setText("Round " + nextRound);
                 }
             }
         });

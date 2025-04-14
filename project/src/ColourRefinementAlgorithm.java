@@ -69,7 +69,7 @@ public class ColourRefinementAlgorithm {
             round += 1;
             colourTable.clear();
             colourIndex = 0;
-            //int currentColourIndex = -1;
+            //currentColourIndex = -1;
             nextRound(nodeGraph1, nodeGraph2);
         } else {
             System.out.println("Algorithm now stable");
@@ -100,12 +100,12 @@ public class ColourRefinementAlgorithm {
                         next.setAttribute("ui.class", "colour");
                     }
                 }else {
-                    colourTable.put(String.valueOf(degree), colourIndex);
+                    colourTable.put(String.valueOf(degree), colourIndex++);
                     if (next.hasAttribute("mark")){next.setAttribute("ui.class", "colour", next.getAttribute("mark"));
                     }else {
                         next.setAttribute("ui.class", "colour");
                     }
-                    colourIndex += 1;
+                    //colourIndex += 1;
                     colorChanges = true;
                     
                 }
@@ -252,18 +252,27 @@ public class ColourRefinementAlgorithm {
         return graph.getNode(currentCentroid);
     }
 
-    public void setIteration(Graph graph, int desiredRound){
-        Node startNode = computeCentroid(graph);
-        Iterator<? extends Node> j = startNode.getBreadthFirstIterator();
-        Iterator<? extends Node> k = startNode.getBreadthFirstIterator();
+    public void setIteration(int desiredRound){
+        Node startNode1 = computeCentroid(graph1);
+        Node startNode2 = computeCentroid(graph2);
+        Iterator<? extends Node> j = startNode1.getBreadthFirstIterator();
+        Iterator<? extends Node> k = startNode1.getBreadthFirstIterator();
+        Iterator<? extends Node> l = startNode2.getBreadthFirstIterator();
+        Iterator<? extends Node> m = startNode2.getBreadthFirstIterator();
         colourTable.clear();
         int colourIndex = 0;
         int currentColourIndex = -1;
 
         while (k.hasNext()) {
             Node next = k.next();
-            String currentSignature = String.valueOf(next.getAttribute("signature"+(desiredRound)));
-            
+            String currentSignature = String.valueOf(next.getAttribute("signature"+(desiredRound))); 
+            if (currentSignature != null && !colourTable.containsKey(currentSignature)) {
+                colourTable.put(currentSignature, colourIndex++);
+            }
+        }
+        while (l.hasNext()) {
+            Node next = l.next();
+            String currentSignature = String.valueOf(next.getAttribute("signature"+(desiredRound))); 
             if (currentSignature != null && !colourTable.containsKey(currentSignature)) {
                 colourTable.put(currentSignature, colourIndex++);
             }
@@ -275,6 +284,15 @@ public class ColourRefinementAlgorithm {
 
         while(j.hasNext()){
             Node next = j.next();
+            String currentSignature = String.valueOf(next.getAttribute("signature"+(desiredRound)));
+            double div = 1/(double)(colourTable.size()-1);
+            currentColourIndex = colourTable.get(currentSignature);     
+            next.setAttribute("ui.color", (float)(div*currentColourIndex));
+            //For debugging
+            //System.out.println("id="+next.getId() + "with colourIndex =" + currentColourIndex + "att =" + div*(currentColourIndex) );
+        }
+        while(m.hasNext()){
+            Node next = m.next();
             String currentSignature = String.valueOf(next.getAttribute("signature"+(desiredRound)));
             double div = 1/(double)(colourTable.size()-1);
             currentColourIndex = colourTable.get(currentSignature);     
