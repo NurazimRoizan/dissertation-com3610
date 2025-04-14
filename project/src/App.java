@@ -171,6 +171,7 @@ public class App implements ViewerListener {
                 colourMode = "spoiler";
                 pebbleStarted = true;
                 pebbleGame = new PebbleGameState(graph, graph2, pebbleK, pebbleN);
+                refineColourPebble();
             }
         });
 

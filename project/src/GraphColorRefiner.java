@@ -18,7 +18,7 @@ public class GraphColorRefiner {
     // Record to represent the signature for partitioning
     // Includes current color, sorted neighbor colors, sorted non-neighbor colors
     // Made public static so it can be potentially accessed if needed, or keep private if not.
-    public static record NodeSignature(int currentColor, Set<Integer> neighborColors, Set<Integer> nonNeighborColors) {}
+    public static record NodeSignature(int currentColor, Set<Integer> neighborColors, Set<Integer> nonNeighborColors, boolean pebbled) {}
 
     /**
      * Constructor. Takes an existing GraphStream graph.
@@ -104,7 +104,9 @@ public class GraphColorRefiner {
             }
 
             // Create the signature
-            NodeSignature signature = new NodeSignature(currentColor, neighborColors, nonNeighborColors);
+            boolean pebbled = false;
+            if (node.hasAttribute("mark")){pebbled = true;}
+            NodeSignature signature = new NodeSignature(currentColor, neighborColors, nonNeighborColors, pebbled);
             nodeSignatures.put(node, signature);
         }
 
