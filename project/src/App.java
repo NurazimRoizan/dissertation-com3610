@@ -362,12 +362,7 @@ public class App implements ViewerListener {
             fromViewer2.pump();
             if (cRefineGraph != null){
                 if (cRefineGraph.getCRefinementGoing()){
-                    if (currentGraph.hasAttribute("pebbleStarted")){
-                        System.out.println("===============================================================");
-                        firstPebble = currentGraph.getNode((String)currentGraph.getAttribute("pebbleStarted"));
-                        System.out.println("starting refinement on node: " + firstPebble.getId());
-                        cRefineGraph.cRefinement(currentGraph, firstPebble);
-                    }else{cRefineGraph.cRefinement(graph, graph2);}  
+                    cRefineGraph.cRefinement(graph, graph2);
                 }
             }
         }
@@ -553,8 +548,13 @@ public class App implements ViewerListener {
 
     public void swapColourMode(){
         if (colourMode.equals("duplicator")) {
-            cRefineGraph = new ColourRefinementAlgorithm(graphLabel1, graph, graphLabel2, graph2 ,sleepTime);
-            cRefineGraph.setCRefinementGoing(true);
+            //cRefineGraph = new NonCountingColourRefinementAlgorithm(graphLabel1, graph, graphLabel2, graph2 ,sleepTime);
+            //cRefineGraph.setCRefinementGoing(true);
+            // NonCountingColourRefinementAlgorithm refineNCRalgo = new NonCountingColourRefinementAlgorithm();
+            // refineNCRalgo.initializeNodeColorsByDegree();
+            // refineNCRalgo.runAllIteration();
+            // refineNCRalgo.updateGraphAppearance();
+            refineColourPebble();
         }
         spoilerMark.setVisible(colourMode.equals("duplicator") ? true : false);
         duplicatorMark.setVisible(colourMode.equals("spoiler") ? true : false);
@@ -566,6 +566,7 @@ public class App implements ViewerListener {
         if (clickedNode.hasAttribute("mark")) {
             if(colourMode.equals("spoiler")){
                 pebbleGame.removePebble(clickedNode);
+                refineColourPebble();
                 nodeInfoLabel.setText(colourMode+ " picked up the pebble");
             }else{
                 JOptionPane.showMessageDialog(null, "Duplicator can not pick up pebble !!", "Choose a different node", JOptionPane.WARNING_MESSAGE);
@@ -668,6 +669,17 @@ public class App implements ViewerListener {
         resetDialog.pack(); // Adjust dialog size to fit components
         resetDialog.setLocationRelativeTo(parentFrame); // Center relative to the parent
         resetDialog.setVisible(true);
+    }
+
+    public void refineColourPebble(){
+        GraphColorRefiner refiner = new GraphColorRefiner(graph);
+        GraphColorRefiner refiner2 = new GraphColorRefiner(graph2);
+        refiner.initializeByDegree();
+        refiner.refineUntilStable();
+        refiner2.initializeByDegree();
+        refiner2.refineUntilStable();
+        GraphAppearanceUpdater.updateNodeAppearance(graph);
+        GraphAppearanceUpdater.updateNodeAppearance(graph2);
     }
 
     public void panelVisibility(boolean flag){

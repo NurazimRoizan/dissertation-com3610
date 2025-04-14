@@ -144,7 +144,7 @@ public class NonCountingColourRefinementAlgorithm extends JFrame {
     /**
      * Initializes node color classes based on their degree (number of neighbors).
      */
-    private void initializeNodeColorsByDegree() {
+    public void initializeNodeColorsByDegree() {
         System.out.println("Initializing node colors by degree...");
         for (Node node : graph) {
             int degree = node.getDegree();
@@ -166,7 +166,7 @@ public class NonCountingColourRefinementAlgorithm extends JFrame {
         refinementComplete = false;
     }
 
-    private void updateGraphAppearance() {
+    public void updateGraphAppearance() {
         for (Node node : graph) {
             int colorClass = (int) node.getAttribute("color_class");
             String colorName = COLOR_PALETTE.get(colorClass % COLOR_PALETTE.size());
@@ -175,7 +175,7 @@ public class NonCountingColourRefinementAlgorithm extends JFrame {
         }
     }
 
-    private boolean refineStep() {
+    public boolean refineStep() {
         Map<NodeSignature, Integer> signatureToNewColor = new HashMap<>();
         Map<Node, NodeSignature> nodeSignatures = new HashMap<>();
         int nextColorId = 0;
@@ -237,6 +237,21 @@ public class NonCountingColourRefinementAlgorithm extends JFrame {
         updateGraphAppearance();
 
         return colorsChanged;
+    }
+
+    public void runAllIteration(){
+        if (refinementComplete) return;
+
+            boolean changed = true;
+            while (changed && !refinementComplete) {
+                changed = refineStep();
+                iterationCount++;
+                 if (!changed) {
+                    refinementComplete = true;
+                 }
+                 // Small delay to allow visualization update (optional)
+                 try { Thread.sleep(100); } catch (InterruptedException ie) {Thread.currentThread().interrupt();}
+            }
     }
 
     public static void main(String[] args) {
