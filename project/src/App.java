@@ -235,6 +235,15 @@ public class App implements ViewerListener {
             }
         });
 
+        JButton debugRefine = new JButton("Refine Colour");
+        debugRefine.setVisible(true);
+        debugRefine.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                refineColourPebble();
+            }
+        });
+
         SpinnerNumberModel model = new SpinnerNumberModel(0, 0, 100, 10);
         speedSpinner = new JSpinner(model);
 
@@ -298,6 +307,7 @@ public class App implements ViewerListener {
         buttonPanel.add(nPebbleLabel);
         buttonPanel.add(pebbleNSpinner);
         buttonPanel.add(pebbleRuleDialogButton);
+        buttonPanel.add(debugRefine);
 
         bottomPanel.add(nodeInfoLabel);
         bottomPanel.add(buttonPanel);
@@ -555,7 +565,7 @@ public class App implements ViewerListener {
             // refineNCRalgo.initializeNodeColorsByDegree();
             // refineNCRalgo.runAllIteration();
             // refineNCRalgo.updateGraphAppearance();
-            refineColourPebble();
+            //refineColourPebble();
         }
         spoilerMark.setVisible(colourMode.equals("duplicator") ? true : false);
         duplicatorMark.setVisible(colourMode.equals("spoiler") ? true : false);
@@ -567,7 +577,8 @@ public class App implements ViewerListener {
         if (clickedNode.hasAttribute("mark")) {
             if(colourMode.equals("spoiler")){
                 pebbleGame.removePebble(clickedNode);
-                refineColourPebble();
+                clickedNode.removeAttribute("mark");
+                //refineColourPebble();
                 nodeInfoLabel.setText(colourMode+ " picked up the pebble");
             }else{
                 JOptionPane.showMessageDialog(null, "Duplicator can not pick up pebble !!", "Choose a different node", JOptionPane.WARNING_MESSAGE);
@@ -673,14 +684,11 @@ public class App implements ViewerListener {
     }
 
     public void refineColourPebble(){
-        GraphColorRefiner refiner = new GraphColorRefiner(graph);
-        GraphColorRefiner refiner2 = new GraphColorRefiner(graph2);
+        GraphColorRefiner refiner = new GraphColorRefiner(graph, graph2);
         refiner.initializeByDegree();
+        //refiner.initializeNodeSameColors();
         refiner.refineUntilStable();
-        refiner2.initializeByDegree();
-        refiner2.refineUntilStable();
-        GraphAppearanceUpdater.updateNodeAppearance(graph);
-        GraphAppearanceUpdater.updateNodeAppearance(graph2);
+        GraphAppearanceUpdater.updateNodeAppearance(graph, graph2);
     }
 
     public void panelVisibility(boolean flag){

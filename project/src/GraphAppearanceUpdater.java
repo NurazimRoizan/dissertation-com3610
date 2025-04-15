@@ -8,90 +8,85 @@ import java.util.Objects;
 /**
  * A utility class with static methods to update the visual appearance
  * of GraphStream graphs based on node attributes.
- * Assumes the graph is potentially displayed in a Swing GUI.
+ * Operates independently on the graphs provided.
  */
-public final class GraphAppearanceUpdater { // final to prevent subclassing utility class
+public final class GraphAppearanceUpdater {
 
-    // Private constructor to prevent instantiation of utility class
-    private GraphAppearanceUpdater() {}
+    private GraphAppearanceUpdater() {} // Private constructor
 
-    // Define the color palette (can be customized)
     private static final List<String> COLOR_PALETTE = List.of(
             "red", "blue", "green", "yellow", "orange", "purple", "cyan", "magenta",
             "lime", "pink", "teal", "lavender", "brown", "beige", "maroon", "olive"
-            // Add more colors if needed
     );
 
     /**
-     * Updates the visual appearance (color and label) of nodes in the given graph
-     * based on their "color_class" integer attribute.
+     * Updates the visual appearance (color and label) of nodes in BOTH provided graphs
+     * based on their respective "color_class" integer attributes.
      *
-     * This method ensures the attribute setting happens on the Swing Event Dispatch Thread
-     * for safety if the graph is actively displayed in a GUI.
+     * Ensures the attribute setting happens on the Swing Event Dispatch Thread.
      *
-     * @param graph The GraphStream graph whose node appearances should be updated. Must not be null.
+     * @param graph1 The first GraphStream graph. Must not be null.
+     * @param graph2 The second GraphStream graph. Must not be null.
      */
-    public static void updateNodeAppearance(Graph graph) {
-        Objects.requireNonNull(graph, "Graph cannot be null");
+    public static void updateNodeAppearance(Graph graph1, Graph graph2) {
+        Objects.requireNonNull(graph1, "Graph 1 cannot be null");
+        Objects.requireNonNull(graph2, "Graph 2 cannot be null");
 
-        // Ensure UI attribute updates happen on the Event Dispatch Thread
+        // Schedule update for both graphs on the EDT
         SwingUtilities.invokeLater(() -> {
-            // System.out.println("Updating graph node appearance on EDT..."); // Optional debug
-            for (Node node : graph) {
-                // Check if the attribute exists before trying to access it
-                if (node.hasAttribute("color_class")) {
-                    try {
-                        // Read the color class attribute
-                        int colorClass = node.getAttribute("color_class", Integer.class);
-                        // Select color from palette (use absolute value and modulo)
-                        String colorName = COLOR_PALETTE.get(Math.abs(colorClass) % COLOR_PALETTE.size());
-                        // Apply style for color
-                        node.setAttribute("ui.style", "fill-color: " + colorName + ";");
-                        // Update label to show ID and color class
-                        //node.setAttribute("ui.label", node.getId() + " (" + colorClass + ")");
-
-                    } catch (Exception e) {
-                        // Handle cases where attribute exists but isn't an Integer or other issues
-                        System.err.println("Error processing 'color_class' for node " + node.getId() + ": " + e.getMessage());
-                        node.setAttribute("ui.style", "fill-color: black;"); // Default error color
-                        //node.setAttribute("ui.label", node.getId() + " (Error)");
-                    }
-                } else {
-                    // Node is missing the attribute - apply a default appearance
-                    node.setAttribute("ui.style", "fill-color: gray;"); // Default color for unclassified
-                    //node.setAttribute("ui.label", node.getId() + " (N/A)");
-                }
-            }
-             // System.out.println("Node appearance update complete on EDT."); // Optional debug
+            // System.out.println("Updating appearance for two graphs on EDT..."); // Debug
+            updateSingleGraphAppearance(graph1, 1); // Update graph 1
+            updateSingleGraphAppearance(graph2, 2); // Update graph 2
+            // System.out.println("Appearance update for two graphs complete on EDT."); // Debug
         });
     }
 
-    /**
-     * Ensures that the graph has a basic stylesheet applied, which is necessary
-     * for properties like "fill-color" to work correctly.
-     * If no "ui.stylesheet" attribute exists, it adds a default one.
-     *
-     * @param graph The graph to check and potentially update. Must not be null.
-     */
-    public static void ensureBaseStylesheet(Graph graph) {
-        Objects.requireNonNull(graph, "Graph cannot be null");
-        // Check and apply on the calling thread, as it's usually done during setup
-        if (graph.getAttribute("ui.stylesheet") == null) {
-            System.out.println("Applying default base stylesheet to graph: " + graph.getId()); // Info
-            graph.setAttribute("ui.stylesheet", getBaseStylesheet());
+    /** Internal helper to update a single graph */
+    private static void updateSingleGraphAppearance(Graph graph, int graphNum) {
+         // System.out.println(" Updating graph " + graphNum + " (ID: " + graph.getId() + ")");
+        for (Node node : graph) {
+            if (node.hasAttribute("color_class")) {
+                try {
+                    int colorClass = node.getAttribute("color_class", Integer.class);
+                    String colorName = COLOR_PALETTE.get(Math.abs(colorClass) % COLOR_PALETTE.size());
+                    node.setAttribute("ui.style", "fill-color: " + colorName + ";");
+                    //node.setAttribute("ui.label", node.getId() + " (" + colorClass + ")");
+                } catch (Exception e) {
+                    System.err.println("Error processing 'color_class' for node " + node.getId() + " in graph " + graphNum + ": " + e.getMessage());
+                    node.setAttribute("ui.style", "fill-color: black;");
+                    //node.setAttribute("ui.label", node.getId() + " (Error)");
+                }
+            } else {
+                node.setAttribute("ui.style", "fill-color: gray;");
+                //node.setAttribute("ui.label", node.getId() + " (N/A)");
+            }
         }
     }
 
     /**
-     * Returns a basic GraphStream stylesheet string.
-     * @return A default stylesheet string.
+     * Ensures that both graphs have a basic stylesheet applied.
+     * @param graph1 The first graph. Must not be null.
+     * @param graph2 The second graph. Must not be null.
      */
+    public static void ensureBaseStylesheet(Graph graph1, Graph graph2) {
+        Objects.requireNonNull(graph1, "Graph 1 cannot be null");
+        Objects.requireNonNull(graph2, "Graph 2 cannot be null");
+        ensureSingleGraphStylesheet(graph1, 1);
+        ensureSingleGraphStylesheet(graph2, 2);
+    }
+
+    /** Internal helper for single graph stylesheet check */
+    private static void ensureSingleGraphStylesheet(Graph graph, int graphNum) {
+         if (graph.getAttribute("ui.stylesheet") == null) {
+            System.out.println("Applying default base stylesheet to graph " + graphNum + " (ID: " + graph.getId() + ")");
+            graph.setAttribute("ui.stylesheet", getBaseStylesheet());
+        }
+    }
+
     private static String getBaseStylesheet() {
-        // Provides basic node/edge appearance, includes 'fill-mode: plain;'
-        // which is important for 'fill-color' to take effect.
         return "node {" +
                "   size: 15px;" +
-               "   fill-mode: plain;" + // Important for fill-color
+               "   fill-mode: plain;" +
                "   text-size: 12;" +
                "   text-alignment: above;" +
                "   stroke-mode: plain;" +
