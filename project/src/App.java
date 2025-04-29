@@ -68,8 +68,8 @@ public class App implements ViewerListener {
     }
 
     public App() {
-        Generator gen = new BarabasiAlbertGenerator(1);
-        Generator gen2 = new BarabasiAlbertGenerator(1);
+        // Generator gen = new BarabasiAlbertGenerator(1);
+        // Generator gen2 = new BarabasiAlbertGenerator(1);
         //Generator gen2 = new DorogovtsevMendesGenerator();
         //graph = TestGraphManager.createGraph("Graph A", gen);
         //graph2 = TestGraphManager.createGraph("Graph B", gen2);

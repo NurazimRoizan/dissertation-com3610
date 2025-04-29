@@ -2,13 +2,22 @@ This project delves into the fascinating intersection of pebble games and the k-
 
 ## Running the Application in VS Code
 
-1. **Open the project in VS Code:** Open the root directory of the project in VS Code.
+1.  **Open the project in VS Code:**
+    * Open the root directory of the project in VS Code.
+    * Ensure you have the necessary Java extensions installed (e.g., the Extension Pack for Java from Microsoft). VS Code should automatically detect the project structure and the external libraries located in the `lib` folder.
 
-2. **Add external libraries to the classpath:**
-   - In the EXPLORER view, expand the "Referenced Libraries" section in the bottom left of the VS Code window.
-   - Click the "+" button to add JAR files.
-   - Navigate to the `lib` folder in your project and select all the JAR files you need to include.
+2.  **Run the application:**
+    * Navigate to and open the App.java file (the one containing the `main` method).
+    * Right-click anywhere within the editor window showing the main file.
+    * Select "Run Java" from the context menu.
 
-3. **Run the application:**
-   - Open the main Java file.
-   - Right-click in the file and select "Run Java".
+3.  **Troubleshooting: If Libraries Aren't Detected (Unlikely):**
+    * In most cases, the external libraries (`.jar` files) in the `lib` folder will be automatically added to the project's classpath by VS Code's Java extensions.
+    * However, **if** you encounter compilation errors or runtime `ClassNotFoundException` errors indicating that libraries are missing, you may need to add them manually:
+        * In the VS Code EXPLORER view (usually on the left sidebar), find the **Java Projects** section.
+        * Expand your project node.
+        * Right-click on the **Referenced Libraries** node.
+        * Choose the option to add JARs (it might look like a '+' icon or be in the context menu).
+        * Navigate to the `lib` folder within your project directory.
+        * Select all the required `.jar` files and confirm their addition.
+        * Try running the application again (Step 2).
