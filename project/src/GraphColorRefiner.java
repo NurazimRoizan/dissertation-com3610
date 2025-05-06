@@ -175,7 +175,7 @@ public class GraphColorRefiner {
         // 2. Determine new color class based on signature (for this graph)
         for (Node node : graph) {
             NodeSignature signature = nodeSignatures.get(node);
-             if (signature == null) continue; // Should have been calculated
+             if (signature == null) continue; 
 
             if (!signatureToNewColor.containsKey(signature)) {
                 signatureToNewColor.put(signature, nextColorId++);

@@ -11,7 +11,7 @@ public class TestGraphManager{
             //"   text-color: white;" +
             "   size: 10px, 15px;" +
             "   stroke-color: black;" +
-            "   size: 20px; fill-color: rgb(100,255,100), rgba(255, 255, 255, 0); fill-mode: gradient-radial;" +
+            "   size: 35px; fill-color: rgb(100,255,100), rgba(255, 255, 255, 0); fill-mode: gradient-radial;" +
             // "   shadow-mode: gradient-radial; shadow-width: 5px; shadow-color: #EEF, #000; shadow-offset: 2px;" +
             "}" +
         "node.marked {" +
@@ -39,7 +39,7 @@ public class TestGraphManager{
             "}" +
         "edge {" +
             "   fill-color: brown;" +
-            // "shape: cubic-curve;" +
+            "size: 2px;" +
             "}" +
         "graph {" +
             "   fill-color: #001329, #1C3353, red;" +
@@ -246,6 +246,30 @@ public class TestGraphManager{
         // Stub nodes
         Node n4 = g.addNode("4"); n4.setAttribute("ui.label", "4");
         Node n5 = g.addNode("5"); n5.setAttribute("ui.label", "5");
+        // Stub edges
+        g.addEdge("e04", k4nodes[0], n4); // Stub 1 attached to K4 node 0
+        g.addEdge("e15", k4nodes[1], n5); // Stub 2 attached to K4 node 1
+
+        g.setAttribute("ui.stylesheet", styleSheet);
+        for (Node node : g) { node.setAttribute("ui.class", "unmarked"); }
+        return g;
+    }
+    public static Graph createPartialIso_G2_K4Stubs2() {
+        Graph g = new SingleGraph("G2_K4Stubsaa");
+        Node[] k4nodes = new Node[4];
+        for (int i = 0; i < 4; i++) {
+            k4nodes[i] = g.addNode(String.valueOf(i));
+            k4nodes[i].setAttribute("ui.label", String.valueOf(i)+10);
+        }
+        // K4 edges (H2)
+        for (int i = 0; i < 4; i++) {
+            for (int j = i + 1; j < 4; j++) {
+                g.addEdge("k4_" + i + "_" + j, k4nodes[i], k4nodes[j]);
+            }
+        }
+        // Stub nodes
+        Node n4 = g.addNode("4"); n4.setAttribute("ui.label", "40");
+        Node n5 = g.addNode("5"); n5.setAttribute("ui.label", "50");
         // Stub edges
         g.addEdge("e04", k4nodes[0], n4); // Stub 1 attached to K4 node 0
         g.addEdge("e15", k4nodes[1], n5); // Stub 2 attached to K4 node 1

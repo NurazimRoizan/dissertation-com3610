@@ -37,7 +37,7 @@ public class InitialDialog extends JDialog {
 
         // Set a maximum size for the dialog
         // Consider adjusting max height based on your image sizes
-        setMaximumSize(new Dimension(600, 600));
+        setMaximumSize(new Dimension(1000, 1000));
     }
 
     private void initComponents() {

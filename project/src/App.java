@@ -54,11 +54,12 @@ public class App implements ViewerListener {
     protected JToggleButton spoilerMark = new JToggleButton("Spoiler Move");
     protected JToggleButton duplicatorMark = new JToggleButton("Duplicator Move");
     protected PebbleGameState pebbleGame;
-    protected JButton startPebbleButton, crButton, backButton, nextButton, welcomeButton, pebbleRuleDialogButton;
+    protected JButton startPebbleButton, crButton, backButton, nextButton, welcomeButton, pebbleRuleDialogButton, debugRefine;
     protected Map<String, Integer> finalColors;
     protected InitialDialog dialog;
     protected JSpinner speedSpinner, pebbleKSpinner, pebbleNSpinner;
     protected int pebbleK = 2; protected int pebbleN = 5;
+    protected boolean autoRefine= false;
     public static final String FINAL_COLOR_ATTR = "color_refinement.final_color";
 
 
@@ -171,7 +172,8 @@ public class App implements ViewerListener {
                 colourMode = "spoiler";
                 pebbleStarted = true;
                 pebbleGame = new PebbleGameState(graph, graph2, pebbleK, pebbleN);
-                refineColourPebble();
+                //refineColourPebble();
+                if(autoRefine){refineColourPebble();}
             }
         });
 
@@ -235,16 +237,23 @@ public class App implements ViewerListener {
             }
         });
 
-        JButton debugRefine = new JButton("Refine Colour");
+        debugRefine = new JButton("Set Auto Refine");
+        debugRefine.setVisible(false);
         debugRefine.setVisible(true);
         debugRefine.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                refineColourPebble();
+                if (autoRefine){
+                    autoRefine=false;
+                    debugRefine.setText("Set Auto Refine");
+                }else{
+                    autoRefine=true;
+                    debugRefine.setText("Stop Auto Refine");
+                }
             }
         });
 
-        SpinnerNumberModel model = new SpinnerNumberModel(0, 0, 100, 10);
+        SpinnerNumberModel model = new SpinnerNumberModel(0, 0, 500, 100);
         speedSpinner = new JSpinner(model);
 
         speedSpinner.addChangeListener(new ChangeListener() {
@@ -477,14 +486,6 @@ public class App implements ViewerListener {
     public void newGraphGenerator(int choosenType, Graph choosenGraph){
         Graph newGraph;
         switch (choosenType) {
-            case 3: // Barabasi
-                //newGraph = TestGraphManager.createGraph("Graph", new BarabasiAlbertGenerator(1), maxNode);
-                newGraph = TestGraphManager.createExampleGraph1();
-                break;
-            case 2: // Dorogo
-                //newGraph = TestGraphManager.createGraph("Graph", new DorogovtsevMendesGenerator(), maxNode);
-                newGraph = TestGraphManager.createExampleGraph2();
-                break;
             case 0: //Simple stub
                 //newGraph = TestGraphManager.createGraph("Graph",new WattsStrogatzGenerator(maxNode,2,0.5), maxNode);
                 newGraph = TestGraphManager.createPartialIso_G1_K4Handle();
@@ -493,7 +494,16 @@ public class App implements ViewerListener {
                 //newGraph = TestGraphManager.createGraph("Graph", new WattsStrogatzGenerator(maxNode,2,0.5), maxNode);
                 newGraph = TestGraphManager.createPartialIso_G2_K4Stubs();
                 break;
-            case 4: //  Simple
+            case 3: // Barabasi
+                //newGraph = TestGraphManager.createGraph("Graph", new BarabasiAlbertGenerator(1), maxNode);
+                newGraph = TestGraphManager.createExampleGraph1();
+                break;
+            case 2: // Dorogo
+                //newGraph = TestGraphManager.createGraph("Graph", new DorogovtsevMendesGenerator(), maxNode);
+                newGraph = TestGraphManager.createExampleGraph2();
+                break;
+
+            case 4: //  Random
                 newGraph = TestGraphManager.createGraph("Graph", new WattsStrogatzGenerator(maxNode,2,0.5), maxNode);
                 break;
             default:
@@ -525,7 +535,6 @@ public class App implements ViewerListener {
 
     public void resetEverything(){
         stopPebble();
-        sleepTime = 0;
         maxNode = 5;
         nodeInfoLabel.setText("Click a node to get detailed attributes . . .");
         startPebbleButton.setText("Start Pebble Game");
@@ -565,7 +574,8 @@ public class App implements ViewerListener {
             // refineNCRalgo.initializeNodeColorsByDegree();
             // refineNCRalgo.runAllIteration();
             // refineNCRalgo.updateGraphAppearance();
-            //refineColourPebble();
+            if (autoRefine){refineColourPebble();}
+            
         }
         spoilerMark.setVisible(colourMode.equals("duplicator") ? true : false);
         duplicatorMark.setVisible(colourMode.equals("spoiler") ? true : false);
@@ -578,7 +588,7 @@ public class App implements ViewerListener {
             if(colourMode.equals("spoiler")){
                 pebbleGame.removePebble(clickedNode);
                 clickedNode.removeAttribute("mark");
-                //refineColourPebble();
+                if (autoRefine){refineColourPebble();}
                 nodeInfoLabel.setText(colourMode+ " picked up the pebble");
             }else{
                 JOptionPane.showMessageDialog(null, "Duplicator can not pick up pebble !!", "Choose a different node", JOptionPane.WARNING_MESSAGE);
@@ -694,7 +704,7 @@ public class App implements ViewerListener {
     public void panelVisibility(boolean flag){
         backButton.setVisible(false);
         nextButton.setVisible(false);
-        if (dialog.isOptionCRSelected()){
+        if (dialog.isOptionCRSelected()){ // Color refinement mode is selected 
             startPebbleButton.setVisible(false);
             crButton.setVisible(true);
             speedSpinner.setVisible(true);
@@ -705,7 +715,10 @@ public class App implements ViewerListener {
             pebbleNSpinner.setVisible(false);
             kPebbleLabel.setVisible(false);
             nPebbleLabel.setVisible(false);
-        }else{
+            debugRefine.setVisible(false);
+
+        }else{ // Pebble game is selected
+            debugRefine.setVisible(true);
             startPebbleButton.setVisible(true);
             crButton.setVisible(false);
             speedSpinner.setVisible(false);
