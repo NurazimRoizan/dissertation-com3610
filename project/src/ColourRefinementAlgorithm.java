@@ -82,8 +82,6 @@ public class ColourRefinementAlgorithm {
     }
 
     public void startup(Node source) {
-        // Iterator<? extends Node> k = source.getDepthFirstIterator();
-        // Iterator<? extends Node> j = source.getDepthFirstIterator();
         Iterator<? extends Node> k = source.getBreadthFirstIterator();
         Iterator<? extends Node> j = source.getBreadthFirstIterator();
         int degree = source.getDegree();
@@ -105,7 +103,6 @@ public class ColourRefinementAlgorithm {
                     }else {
                         next.setAttribute("ui.class", "colour");
                     }
-                    //colourIndex += 1;
                     colorChanges = true;
                     
                 }
@@ -142,11 +139,6 @@ public class ColourRefinementAlgorithm {
         Iterator<? extends Node> k = source.getBreadthFirstIterator();
         Iterator<? extends Node> j = source.getBreadthFirstIterator();
         Iterator<? extends Node> i = source.getBreadthFirstIterator();
-        // Iterator<? extends Node> k = source.getDepthFirstIterator();
-        // Iterator<? extends Node> j = source.getDepthFirstIterator();
-        // Iterator<? extends Node> i = source.getDepthFirstIterator();
-
-        //colorChanges = false;
 
         // Update each node with signature attribute
         System.out.println("Updating signature for round " + round);
@@ -201,16 +193,9 @@ public class ColourRefinementAlgorithm {
         String currentSignature = String.valueOf(source.getAttribute("signature"+(round-1)));
         String currentDegree = currentSignature.substring(0,1);
         StringBuilder neighbourSignature = new StringBuilder();
-        // if (source.getAttribute("mark")=="spoiler"){
-        //     neighbourSignature.append("s");
-        // }else if (source.getAttribute("mark")=="duplicator"){
-        //     neighbourSignature.append("d");
-        // }
         if (source.hasAttribute("mark")){neighbourSignature.append("p");}
         neighbourNodes.forEach(neighbourNode -> {
             neighbourSignature.append(String.valueOf(neighbourNode.getAttribute("signature"+(round-1))));
-            //System.out.println("Neighbor color signature: " + neighbourSignature);
-            //System.out.println("Current Signature: " + String.valueOf(currentDegree) + neighbourSignature);
         });
         String sortedNeighbourSignature = createReverseSortedSignature(neighbourSignature.toString());
         neighbourSignature.setLength(0);

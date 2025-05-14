@@ -2,16 +2,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List; // Import List
+import java.util.List; 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.graphstream.graph.*;
 import org.graphstream.graph.implementations.*;
-import org.graphstream.ui.swing_viewer.SwingViewer; // Correct import
-import org.graphstream.ui.swing_viewer.ViewPanel; // Correct import
-import org.graphstream.ui.view.Viewer; // Correct import
+import org.graphstream.ui.swing_viewer.SwingViewer; 
+import org.graphstream.ui.swing_viewer.ViewPanel; 
+import org.graphstream.ui.view.Viewer; 
 
 public class NonCountingColourRefinementAlgorithm extends JFrame {
 
@@ -21,34 +21,29 @@ public class NonCountingColourRefinementAlgorithm extends JFrame {
     private int iterationCount = 0;
     private boolean refinementComplete = false;
 
-    // Define a color palette for visualization
     private static final List<String> COLOR_PALETTE = List.of(
             "red", "blue", "green", "yellow", "orange", "purple", "cyan", "magenta",
             "lime", "pink", "teal", "lavender", "brown", "beige", "maroon", "olive"
-            // Add more colors if needed
     );
 
-    // Record to represent the signature for partitioning
-    // Includes current color, sorted neighbor colors, sorted non-neighbor colors
     private record NodeSignature(int currentColor, Set<Integer> neighborColors, Set<Integer> nonNeighborColors) {}
 
     public NonCountingColourRefinementAlgorithm() {
-        super("Color Refinement Variant (Neighbors & Non-Neighbors)");
+        super("Color Refinement Variant (Non-Counting)");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
-        setLocationRelativeTo(null); // Center the window
+        setLocationRelativeTo(null); 
 
         // --- Graph Setup ---
-        System.setProperty("org.graphstream.ui", "swing"); // Use Swing UI
+        System.setProperty("org.graphstream.ui", "swing"); 
         graph = new SingleGraph("ColorRefinementGraph");
-        createExampleGraph(); // Populate the graph
+        createExampleGraph(); 
         initializeNodeColorsByDegree();
-        //initializeNodeColors(); // Set initial color (e.g., 0 for all)
 
         // --- GraphStream Viewer Setup ---
         viewer = new SwingViewer(graph, Viewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
-        viewer.enableAutoLayout(); // Enable layout algorithm
-        viewPanel = (ViewPanel) viewer.addDefaultView(false); // false means no JFrame wrapper
+        viewer.enableAutoLayout(); 
+        viewPanel = (ViewPanel) viewer.addDefaultView(false); 
         viewPanel.setPreferredSize(new Dimension(600, 500));
 
         // --- Control Panel ---
@@ -82,7 +77,6 @@ public class NonCountingColourRefinementAlgorithm extends JFrame {
                  if (!changed) {
                     refinementComplete = true;
                  }
-                 // Small delay to allow visualization update (optional)
                  try { Thread.sleep(100); } catch (InterruptedException ie) {Thread.currentThread().interrupt();}
             }
              statusLabel.setText("Iteration: " + iterationCount + ". Stable state reached.");
@@ -104,22 +98,17 @@ public class NonCountingColourRefinementAlgorithm extends JFrame {
     }
 
     private void createExampleGraph() {
-        // Example: A simple graph (e.g., a path graph or a cycle)
-        graph.setStrict(false); // Allow auto-creation of nodes on edge add
+        graph.setStrict(false); 
         graph.setAutoCreate(true);
 
-        // A small graph for demonstration
         graph.addEdge("AB", "A", "B");
         graph.addEdge("BC", "B", "C");
         graph.addEdge("CD", "C", "D");
         graph.addEdge("DE", "D", "E");
         graph.addEdge("EF", "E", "F");
-        graph.addEdge("FA", "F", "A"); // Cycle A-B-C-D-E-F-A
-        graph.addEdge("AC", "A", "C"); // Chord
-        graph.addEdge("BD", "B", "D"); // Chord
-
-        // Add an isolated node
-        //graph.addNode("G");
+        graph.addEdge("FA", "F", "A"); 
+        graph.addEdge("AC", "A", "C"); 
+        graph.addEdge("BD", "B", "D"); 
 
         // Basic styling
         graph.setAttribute("ui.stylesheet", getStylesheet());
@@ -149,7 +138,7 @@ public class NonCountingColourRefinementAlgorithm extends JFrame {
         for (Node node : graph) {
             int degree = node.getDegree();
             node.setAttribute("color_class", degree); // Use degree as initial color
-            node.setAttribute("next_color_class", degree); // Initialize next color to the same
+            node.setAttribute("next_color_class", degree); 
             System.out.println("  Node " + node.getId() + ": Degree = " + degree);
         }
         iterationCount = 0;
@@ -159,8 +148,8 @@ public class NonCountingColourRefinementAlgorithm extends JFrame {
 
     private void initializeNodeColors() {
         for (Node node : graph) {
-            node.setAttribute("color_class", 0); // Initial color class is 0
-            node.setAttribute("next_color_class", 0); // Initialize next color
+            node.setAttribute("color_class", 0); 
+            node.setAttribute("next_color_class", 0); 
         }
         iterationCount = 0;
         refinementComplete = false;
@@ -171,7 +160,7 @@ public class NonCountingColourRefinementAlgorithm extends JFrame {
             int colorClass = (int) node.getAttribute("color_class");
             String colorName = COLOR_PALETTE.get(colorClass % COLOR_PALETTE.size());
             node.setAttribute("ui.style", "fill-color: " + colorName + ";");
-            node.setAttribute("ui.label", node.getId() + " (" + colorClass + ")"); // Show node ID and color class
+            node.setAttribute("ui.label", node.getId() + " (" + colorClass + ")"); 
         }
     }
 
@@ -249,13 +238,11 @@ public class NonCountingColourRefinementAlgorithm extends JFrame {
                  if (!changed) {
                     refinementComplete = true;
                  }
-                 // Small delay to allow visualization update (optional)
                  try { Thread.sleep(100); } catch (InterruptedException ie) {Thread.currentThread().interrupt();}
             }
     }
 
     public static void main(String[] args) {
-        // Run the application on the Event Dispatch Thread (EDT)
         SwingUtilities.invokeLater(() -> {
             NonCountingColourRefinementAlgorithm app = new NonCountingColourRefinementAlgorithm();
             app.setVisible(true);

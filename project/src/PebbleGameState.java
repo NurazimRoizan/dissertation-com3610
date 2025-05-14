@@ -25,7 +25,6 @@ public class PebbleGameState {
     }
 
     public void addPebble(Node newNode, Graph currentGraph, String currentMode) {
-
         if (currentMode.equals("spoiler")) {
             // Spoiler just placed a pebble
             currentSpoilerPebble = newNode;
@@ -33,11 +32,9 @@ public class PebbleGameState {
             System.out.println("Spoiler placed pebble on " + newNode.getId() + " in graph " + currentGraph.getId());
         } else { // Duplicator is responding
             System.out.println("Duplicator attempting to respond with " + newNode.getId() + " in graph " + currentGraph.getId());
-
             Node pebbleForG1;
             Node pebbleForG2;
             boolean checkResult;
-
             // Determine which node corresponds to G1 and G2 for this round's pair
             if (currentSpoilerGraph.equals(graph1)) {
                 // Spoiler previously chose in graph1, Duplicator responds with newNode (in graph2)
@@ -48,11 +45,8 @@ public class PebbleGameState {
                 pebbleForG1 = newNode;
                 pebbleForG2 = currentSpoilerPebble;
             }
-
             // Check if this move maintains the partial isomorphism
             checkResult = checkPartialIso(pebbleForG1, pebbleForG2);
-
-
             if (!checkResult) {
                 // Duplicator's move fails the check - Spoiler wins
                 System.out.println("-------------------------");
@@ -93,7 +87,6 @@ public class PebbleGameState {
             Node existingG2 = this.pebblesG2.get(i);
 
             // Check adjacency between the new node and existing nodes
-            // Assumes undirected graphs via hasEdgeBetween. Modify if directed needed.
             boolean adjacentInG1 = newNodeG1.hasEdgeBetween(existingG1);
             boolean adjacentInG2 = newNodeG2.hasEdgeBetween(existingG2);
 
@@ -124,8 +117,6 @@ public class PebbleGameState {
 
         // Find the index of the pebble pair corresponding to the clicked node
         for (int i = 0; i < pebblesG1.size(); i++) {
-            // Check if the clicked node matches either node in the current pair
-            // Using Objects.equals for null-safety, though nodes here shouldn't be null
             if (Objects.equals(clickedNode, pebblesG1.get(i)) || Objects.equals(clickedNode, pebblesG2.get(i))) {
                 indexToRemove = i;
                 break; // Found the pair, exit the loop

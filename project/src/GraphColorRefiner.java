@@ -6,8 +6,6 @@ import java.util.stream.Stream;
 
 /**
  * Performs DISJOINT color refinement on TWO GraphStream graphs concurrently.
- * The refinement of graph1 depends only on graph1, and graph2 only on graph2.
- * The class manages the state for both independent processes.
  */
 public class GraphColorRefiner {
 
@@ -19,7 +17,6 @@ public class GraphColorRefiner {
     private boolean refinementComplete2 = false;
 
     // Signature record for single-graph refinement
-    // (No longer needs the combined signature)
     private record NodeSignature(int currentColor, Set<Integer> neighborColors, Set<Integer> nonNeighborColors, int pebbled) {}
 
     /**
@@ -129,7 +126,6 @@ public class GraphColorRefiner {
         Map<Node, NodeSignature> nodeSignatures = new HashMap<>();
         int nextColorId = 0;
         boolean colorsChanged = false;
-        //Iterator<Node> allNodes = graph.iterator();// dont need here
 
         // 1. Calculate Signatures for each node in this graph
         for (Node node : graph) {
@@ -147,12 +143,10 @@ public class GraphColorRefiner {
             neighborIt.forEach(neighbor -> {
                 if (neighbor.getAttribute("color_class") != null) {
                     neighborColors.add(neighbor.getAttribute("color_class", Integer.class));
-               } else {
-                   // Handle missing attribute if necessary
                }
                neighbors.add(neighbor);
             });
-            Iterator<Node> allNodes = graph.iterator();// Get all nodes once
+            Iterator<Node> allNodes = graph.iterator();
 
             // Get non-neighbor colors (only from this graph)
             Set<Integer> nonNeighborColors = new TreeSet<>();
@@ -161,8 +155,6 @@ public class GraphColorRefiner {
                 if (otherNode != node && !neighbors.contains(otherNode)) {
                     if (otherNode.getAttribute("color_class") != null) {
                         nonNeighborColors.add(otherNode.getAttribute("color_class", Integer.class));
-                    } else {
-                         // Handle missing attribute if necessary
                     }
                 }
             }

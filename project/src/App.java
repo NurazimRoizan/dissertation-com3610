@@ -69,17 +69,10 @@ public class App implements ViewerListener {
     }
 
     public App() {
-        // Generator gen = new BarabasiAlbertGenerator(1);
-        // Generator gen2 = new BarabasiAlbertGenerator(1);
-        //Generator gen2 = new DorogovtsevMendesGenerator();
-        //graph = TestGraphManager.createGraph("Graph A", gen);
-        //graph2 = TestGraphManager.createGraph("Graph B", gen2);
         graph = TestGraphManager.createExampleGraph1();
         graph2 = TestGraphManager.createExampleGraph2();
         currentGraph = graph;
 
-        // graph.setAutoCreate(true);
-        // graph.setStrict(false);
         SwingViewer viewer = new SwingViewer(graph, SwingViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
         SwingViewer viewer2 = new SwingViewer(graph2, SwingViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
         viewer.enableAutoLayout();
@@ -89,9 +82,12 @@ public class App implements ViewerListener {
 
         frame = new JFrame("Main Window");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        dialog = new InitialDialog(frame); // Pass the frame as parent
+
+        // Initialize with Welcome Dialog in MAIN GUI
+        dialog = new InitialDialog(frame);
         dialog.setVisible(true);
 
+        // JPanel and associated variable declarations
         JPanel headerPanel = new JPanel(new GridLayout(1, 2));
         JPanel bottomPanel = new JPanel(new GridLayout(2, 1));
         JPanel buttonPanel = new JPanel(new FlowLayout());
@@ -115,7 +111,9 @@ public class App implements ViewerListener {
         spoilerMark.setSelected(true);
         duplicatorMark.setSelected(true);
         duplicatorMark.setVisible(false);
-        
+
+
+        // All buttons declarations
         Border emptyBorder = BorderFactory.createEmptyBorder(5, 5, 5, 5);
         spoilerMark.addActionListener(new ActionListener() {
             @Override
@@ -487,33 +485,27 @@ public class App implements ViewerListener {
         Graph newGraph;
         switch (choosenType) {
             case 0: //Simple stub
-                //newGraph = TestGraphManager.createGraph("Graph",new WattsStrogatzGenerator(maxNode,2,0.5), maxNode);
                 newGraph = TestGraphManager.createPartialIso_G1_K4Handle();
                 break;
             case 1: //  Simple 2 Stub
-                //newGraph = TestGraphManager.createGraph("Graph", new WattsStrogatzGenerator(maxNode,2,0.5), maxNode);
                 newGraph = TestGraphManager.createPartialIso_G2_K4Stubs();
                 break;
-            case 3: // Barabasi
-                //newGraph = TestGraphManager.createGraph("Graph", new BarabasiAlbertGenerator(1), maxNode);
+            case 3: // Star
                 newGraph = TestGraphManager.createExampleGraph1();
                 break;
-            case 2: // Dorogo
-                //newGraph = TestGraphManager.createGraph("Graph", new DorogovtsevMendesGenerator(), maxNode);
+            case 2: // Triangle
                 newGraph = TestGraphManager.createExampleGraph2();
                 break;
 
-            case 4: //  Random
+            case 4: //  Random Generator
                 newGraph = TestGraphManager.createGraph("Graph", new WattsStrogatzGenerator(maxNode,2,0.5), maxNode);
                 break;
             default:
                 newGraph = TestGraphManager.createGraph("Graph", new WattsStrogatzGenerator(10,2,0.5), maxNode);
-                //newGraph = TestGraphManager.createPathP4("NonIso_P4");
 
         }
         System.out.println("Getting new graph");
         choosenGraph.clear();
-        //Graph newGraph = TestGraphManager.createGraph("Graph A", new DorogovtsevMendesGenerator());
 
         newGraph.attributeKeys().forEach((key) -> {
             choosenGraph.setAttribute(key, new Object[]{newGraph.getAttribute(key)});
@@ -568,19 +560,13 @@ public class App implements ViewerListener {
 
     public void swapColourMode(){
         if (colourMode.equals("duplicator")) {
-            //cRefineGraph = new NonCountingColourRefinementAlgorithm(graphLabel1, graph, graphLabel2, graph2 ,sleepTime);
-            //cRefineGraph.setCRefinementGoing(true);
-            // NonCountingColourRefinementAlgorithm refineNCRalgo = new NonCountingColourRefinementAlgorithm();
-            // refineNCRalgo.initializeNodeColorsByDegree();
-            // refineNCRalgo.runAllIteration();
-            // refineNCRalgo.updateGraphAppearance();
             if (autoRefine){refineColourPebble();}
-            
         }
         spoilerMark.setVisible(colourMode.equals("duplicator") ? true : false);
         duplicatorMark.setVisible(colourMode.equals("spoiler") ? true : false);
         colourMode = (colourMode.equals("duplicator") ? "spoiler" : "duplicator") ;
-        nodeInfoLabel.setText("Round " + (pebbleGame.getCurrentRound()) + " : " +colourMode.substring(0, 1).toUpperCase() + colourMode.substring(1) + " turn");
+        nodeInfoLabel.setText("Round " + (pebbleGame.getCurrentRound()) + " : " +colourMode.substring(0, 1).toUpperCase() + 
+            colourMode.substring(1) + " turn");
     }
 
     public void playerMovePebble(Node clickedNode){
@@ -624,7 +610,7 @@ public class App implements ViewerListener {
         JPanel checkboxPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         clearBothGraphCheckBox.setHorizontalTextPosition(SwingConstants.LEFT);
         checkboxPanel.add(clearBothGraphCheckBox);
-        clearBothGraphCheckBox.setSelected(false); // Set initial state if needed
+        clearBothGraphCheckBox.setSelected(false);
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
         ActionListener graphButtonListener = new ActionListener() {
@@ -650,7 +636,7 @@ public class App implements ViewerListener {
                     newGraphGenerator(choice, currentGraph);
                 }
                 resetEverything();
-                resetDialog.dispose(); // Close the dialog
+                resetDialog.dispose(); 
             }
         };
 
@@ -658,13 +644,13 @@ public class App implements ViewerListener {
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                resetDialog.dispose(); // Close the dialog
+                resetDialog.dispose(); 
             }
         });
 
         for (String option : graphOptions) {
             JButton optionButton = new JButton(option);
-            optionButton.setActionCommand(option); // Set the action command to the graph type
+            optionButton.setActionCommand(option);
             optionButton.addActionListener(graphButtonListener);
             buttonPanel.add(optionButton);
         }
@@ -688,15 +674,14 @@ public class App implements ViewerListener {
         resetDialog.add(graphTypeLabel, BorderLayout.CENTER);
         resetDialog.add(buttonPanel, BorderLayout.SOUTH);
 
-        resetDialog.pack(); // Adjust dialog size to fit components
-        resetDialog.setLocationRelativeTo(parentFrame); // Center relative to the parent
+        resetDialog.pack();
+        resetDialog.setLocationRelativeTo(parentFrame); 
         resetDialog.setVisible(true);
     }
 
     public void refineColourPebble(){
         GraphColorRefiner refiner = new GraphColorRefiner(graph, graph2);
         refiner.initializeByDegree();
-        //refiner.initializeNodeSameColors();
         refiner.refineUntilStable();
         GraphAppearanceUpdater.updateNodeAppearance(graph, graph2);
     }

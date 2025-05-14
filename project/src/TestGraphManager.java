@@ -6,20 +6,16 @@ import org.graphstream.graph.implementations.SingleGraph;
 public class TestGraphManager{
     protected static String styleSheet =
         "node {" +
-            // "     shape: box;" +
             "   stroke-mode: plain;" +
-            //"   text-color: white;" +
             "   size: 10px, 15px;" +
             "   stroke-color: black;" +
             "   size: 35px; fill-color: rgb(100,255,100), rgba(255, 255, 255, 0); fill-mode: gradient-radial;" +
-            // "   shadow-mode: gradient-radial; shadow-width: 5px; shadow-color: #EEF, #000; shadow-offset: 2px;" +
             "}" +
         "node.marked {" +
             "   fill-color: red;" +
             "}" +
         "node.colour {" +
             "   fill-mode: dyn-plain;" +
-            // "   fill-color: red, darkgreen, white, blue, magenta, #444;" +
             "   fill-color: red, rgb(255, 200, 100), yellow, rgb(50, 200, 0), green, blue, darkblue, rgb(200, 100, 200), rgb(180, 0, 180), rgb(100, 200, 200), rgb(255, 102, 0);" +
             "}" +
         "node.colour0 {" +
@@ -46,9 +42,6 @@ public class TestGraphManager{
             "   fill-mode: gradient-vertical;" +
             "}";
     public static Graph createGraph(String name, Generator gen , int maxNode) {
-                //Generator gen = new DorogovtsevMendesGenerator();
-                //Generator gen = new BananaTreeGenerator();
-                //Generator gen = new BarabasiAlbertGenerator(1);
                 Graph graph = new SingleGraph(name);
                 gen.addSink(graph);
                 gen.begin();
@@ -69,7 +62,7 @@ public class TestGraphManager{
     }
 
     public static Graph createExampleGraph1(){
-        Graph g1 = new SingleGraph("G1_CFI"); // C6 with P2 attached to each node
+        Graph g1 = new SingleGraph("G1_CFI"); 
 
         // Build G1
         Node[] cycle1 = new Node[6];
@@ -95,7 +88,7 @@ public class TestGraphManager{
         return g1;
     }
     public static Graph createExampleGraph2(){
-        Graph g2 = new SingleGraph("G2_CFI"); // 2x C3 with P2 attached to each node
+        Graph g2 = new SingleGraph("G2_CFI"); 
 
         // Build G2
         Node[] cycle2a = new Node[3];

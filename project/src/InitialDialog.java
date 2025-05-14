@@ -5,29 +5,26 @@ import java.awt.event.ActionListener;
 
 public class InitialDialog extends JDialog {
 
-    // Removed the single top imageLabel
-
     // Components for the first option
     private JLabel headingLabel1;
-    private JLabel imageLabel1; // Label for the first image
+    private JLabel imageLabel1; 
     private JLabel descriptionLabel1;
     private JButton button1;
 
     // Components for the second option
     private JLabel headingLabel2;
-    private JLabel imageLabel2; // Label for the second image
+    private JLabel imageLabel2; 
     private JLabel descriptionLabel2;
     private JButton button2;
 
     private JPanel contentPane;
     // Field to store the user's choice
-    private boolean optionCRSelected = false; // Default to false (Option 2 or closed)
+    private boolean optionCRSelected = false; // Default to false
 
     // Define a width for the description text wrapping
-    private static final int DESCRIPTION_WIDTH = 200; // pixels
-    private static final float HEADING_FONT_SIZE_INCREASE = 4f; // Increase heading font size by 4 points
+    private static final int DESCRIPTION_WIDTH = 200; 
+    private static final float HEADING_FONT_SIZE_INCREASE = 4f; 
     private static final int MAX_IMAGE_HEIGHT = 250;
-    // Removed IMAGE_SIZE constant
 
     public InitialDialog(JFrame parent) {
         super(parent, "Welcome", true);
@@ -35,33 +32,26 @@ public class InitialDialog extends JDialog {
         layoutComponents();
         addEventHandlers();
 
-        // Set a maximum size for the dialog
-        // Consider adjusting max height based on your image sizes
         setMaximumSize(new Dimension(1000, 1000));
     }
 
     private void initComponents() {
         contentPane = new JPanel();
-        contentPane.setBackground(Color.decode("#7DA2C1")); // Added background color
+        contentPane.setBackground(Color.decode("#7DA2C1"));
         // --- Image Initialization ---
-        // ** IMPORTANT: Replace these placeholder paths with the actual paths to your images! **
-        String imagePath1 = "ImagePebbleGame.png"; // Placeholder path 1
-        String imagePath2 = "ImageColourRefine.png"; // Placeholder path 2
+        String imagePath1 = "ImagePebbleGame.png"; 
+        String imagePath2 = "ImageColourRefine.png"; 
 
         ImageIcon icon1 = createImageIcon(imagePath1, "Icon for Option 1");
         ImageIcon icon2 = createImageIcon(imagePath2, "Icon for Option 2");
 
-        // Create JLabels for the images
         imageLabel1 = new JLabel(icon1);
-        // Set a preferred size if your images are large and you want to scale them
-        // imageLabel1.setPreferredSize(new Dimension(100, 100)); // Example size
         if (icon1 == null) {
             imageLabel1.setText("Image 1 not found"); // Placeholder text if image fails
         }
 
 
         imageLabel2 = new JLabel(icon2);
-        // imageLabel2.setPreferredSize(new Dimension(100, 100)); // Example size
          if (icon2 == null) {
             imageLabel2.setText("Image 2 not found"); // Placeholder text if image fails
         }
@@ -125,7 +115,7 @@ public class InitialDialog extends JDialog {
             double scaleRatio = (double) MAX_IMAGE_HEIGHT / (double) originalHeight;
             int newWidth = (int) (originalWidth * scaleRatio);
 
-            // Create scaled image instance (use SCALE_SMOOTH for better quality)
+            // Create scaled image instance
             Image scaledImage = originalImage.getScaledInstance(newWidth, MAX_IMAGE_HEIGHT, Image.SCALE_SMOOTH);
 
             // Return a new ImageIcon based on the scaled image
@@ -140,12 +130,8 @@ public class InitialDialog extends JDialog {
     private void layoutComponents() {
         contentPane.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        // General padding - adjust as needed
         gbc.insets = new Insets(5, 15, 5, 15);
-        gbc.weightx = 0.5; // Give columns equal horizontal weight by default
-
-
-        // --- Column 1: Option 1 ---
+        gbc.weightx = 0.5;
 
         // Row 0: Heading 1
         gbc.gridx = 0;
@@ -158,28 +144,28 @@ public class InitialDialog extends JDialog {
 
         // Row 1: Image 1
         gbc.gridy = 1;
-        gbc.anchor = GridBagConstraints.CENTER; // Center the image
-        gbc.fill = GridBagConstraints.NONE;     // Don't resize image component
+        gbc.anchor = GridBagConstraints.CENTER; 
+        gbc.fill = GridBagConstraints.NONE;   
         contentPane.add(imageLabel1, gbc);
 
         // Row 2: Description 1
         gbc.gridy = 2;
-        gbc.weighty = 0.5; // Give description vertical weight
+        gbc.weighty = 0.5; 
         gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.fill = GridBagConstraints.HORIZONTAL; // Fill description horizontally
+        gbc.fill = GridBagConstraints.HORIZONTAL; 
         contentPane.add(descriptionLabel1, gbc);
 
         // Row 3: Button 1
         gbc.gridy = 3;
-        gbc.weighty = 0; // Reset weighty for button
+        gbc.weighty = 0; 
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.insets = new Insets(5, 15, 10, 15); // Bottom padding for button row
+        gbc.insets = new Insets(5, 15, 10, 15); 
         contentPane.add(button1, gbc);
 
 
         // --- Column 2: Option 2 ---
-        gbc.insets = new Insets(5, 15, 5, 15); // Reset insets for column 2
+        gbc.insets = new Insets(5, 15, 5, 15); 
 
         // Row 0: Heading 2
         gbc.gridx = 1;
@@ -191,42 +177,36 @@ public class InitialDialog extends JDialog {
 
         // Row 1: Image 2
         gbc.gridy = 1;
-        gbc.anchor = GridBagConstraints.CENTER; // Center the image
-        gbc.fill = GridBagConstraints.NONE;     // Don't resize image component
+        gbc.anchor = GridBagConstraints.CENTER; 
+        gbc.fill = GridBagConstraints.NONE;     
         contentPane.add(imageLabel2, gbc);
 
         // Row 2: Description 2
         gbc.gridy = 2;
-        gbc.weighty = 0.5; // Give description vertical weight
+        gbc.weighty = 0.5; 
         gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.fill = GridBagConstraints.HORIZONTAL; // Fill description horizontally
+        gbc.fill = GridBagConstraints.HORIZONTAL; 
         contentPane.add(descriptionLabel2, gbc);
 
         // Row 3: Button 2
         gbc.gridy = 3;
-        gbc.weighty = 0; // Reset weighty for button
+        gbc.weighty = 0; 
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.insets = new Insets(5, 15, 10, 15); // Bottom padding for button row
+        gbc.insets = new Insets(5, 15, 10, 15); 
         contentPane.add(button2, gbc);
 
-
-        // Set the content pane
         setContentPane(contentPane);
-
-        // Pack the dialog
         pack();
-
-        setLocationRelativeTo(getParent()); // Center the dialog
+        setLocationRelativeTo(getParent()); 
     }
 
     private void addEventHandlers() {
-        // Action listeners remain the same
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 optionCRSelected = false; 
-                dispose(); // Close the dialog
+                dispose(); 
             }
         });
 
@@ -240,7 +220,7 @@ public class InitialDialog extends JDialog {
     }
 
     /**
-     * Call this method *after* the dialog has been closed (i.e., after setVisible(true) returns)
+     * Call this method *after* the dialog has been closed
      * to check which option the user selected.
      *
      * @return true if Option 1 was selected, false otherwise (Option 2 or closed).

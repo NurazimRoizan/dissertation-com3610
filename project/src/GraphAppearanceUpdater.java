@@ -1,7 +1,7 @@
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 
-import javax.swing.SwingUtilities; // For invokeLater
+import javax.swing.SwingUtilities;
 import java.util.List;
 import java.util.Objects;
 
@@ -12,7 +12,7 @@ import java.util.Objects;
  */
 public final class GraphAppearanceUpdater {
 
-    private GraphAppearanceUpdater() {} // Private constructor
+    private GraphAppearanceUpdater() {}
 
     private static final List<String> COLOR_PALETTE = List.of(
             "red", "blue", "green", "yellow", "orange", "purple", "cyan", "magenta",
@@ -23,8 +23,6 @@ public final class GraphAppearanceUpdater {
      * Updates the visual appearance (color and label) of nodes in BOTH provided graphs
      * based on their respective "color_class" integer attributes.
      *
-     * Ensures the attribute setting happens on the Swing Event Dispatch Thread.
-     *
      * @param graph1 The first GraphStream graph. Must not be null.
      * @param graph2 The second GraphStream graph. Must not be null.
      */
@@ -32,12 +30,11 @@ public final class GraphAppearanceUpdater {
         Objects.requireNonNull(graph1, "Graph 1 cannot be null");
         Objects.requireNonNull(graph2, "Graph 2 cannot be null");
 
-        // Schedule update for both graphs on the EDT
         SwingUtilities.invokeLater(() -> {
-            // System.out.println("Updating appearance for two graphs on EDT..."); // Debug
+            // System.out.println("Updating appearance for two graphs..."); // Debug
             updateSingleGraphAppearance(graph1, 1); // Update graph 1
             updateSingleGraphAppearance(graph2, 2); // Update graph 2
-            // System.out.println("Appearance update for two graphs complete on EDT."); // Debug
+            // System.out.println("Appearance update for two graphs complete."); // Debug
         });
     }
 
@@ -50,15 +47,12 @@ public final class GraphAppearanceUpdater {
                     int colorClass = node.getAttribute("color_class", Integer.class);
                     String colorName = COLOR_PALETTE.get(Math.abs(colorClass) % COLOR_PALETTE.size());
                     node.setAttribute("ui.style", "fill-color: " + colorName + ";");
-                    //node.setAttribute("ui.label", node.getId() + " (" + colorClass + ")");
                 } catch (Exception e) {
                     System.err.println("Error processing 'color_class' for node " + node.getId() + " in graph " + graphNum + ": " + e.getMessage());
                     node.setAttribute("ui.style", "fill-color: black;");
-                    //node.setAttribute("ui.label", node.getId() + " (Error)");
                 }
             } else {
                 node.setAttribute("ui.style", "fill-color: gray;");
-                //node.setAttribute("ui.label", node.getId() + " (N/A)");
             }
         }
     }
@@ -82,7 +76,7 @@ public final class GraphAppearanceUpdater {
             graph.setAttribute("ui.stylesheet", getBaseStylesheet());
         }
     }
-
+    // Will be overwrite later
     private static String getBaseStylesheet() {
         return "node {" +
                "   size: 15px;" +
